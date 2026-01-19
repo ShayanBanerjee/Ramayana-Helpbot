@@ -34,7 +34,10 @@ def _sources_from_docs(docs) -> List[Dict[str, Any]]:
 
 def answer_question(question: str, retriever, k: int = 5) -> Tuple[str, List[Dict[str, Any]]]:
     docs = retriever.get_relevant_documents(question)
+    print(f"Retrieved {len(docs)} documents for question: {question}")
     context = _build_context(docs)
+    print(f"Built context of length {len(context)} characters.")
+    print("Invoking LLM...")
 
     llm = ChatOpenAI(
         model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
@@ -44,5 +47,7 @@ def answer_question(question: str, retriever, k: int = 5) -> Tuple[str, List[Dic
 
     prompt = BASE_SYSTEM_PROMPT + "\n\n" + USER_PROMPT_TEMPLATE.format(context=context, question=question)
     resp = llm.invoke(prompt)
+    print(f"LLM invocation complete for this question: {question}")
+    print(f"Context for the prompt: {context}")
 
     return resp.content, _sources_from_docs(docs)
