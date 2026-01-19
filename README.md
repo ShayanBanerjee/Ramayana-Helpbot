@@ -1,120 +1,154 @@
-# Ramayana HelpBot (RAG) — Chroma DB + LangChain + Flask + React
+# 🏹 Ramayana HelpBot – Offline RAG Chatbot (llama.cpp Edition)
 
-Local-first RAG chatbot over your Valmiki Ramayana PDFs.
-Ingest PDFs → build Chroma index → retrieve top-K chunks → generate grounded answers with citations.
+A **Retrieval-Augmented Generation (RAG)** chatbot built on the *Valmiki Ramayana*, designed to work **fully offline**, **CPU-first**, and **open‑source**.  
+This version uses **llama.cpp** for local inference and **ChromaDB** as the vector database.
 
-## Tech stack
-- **Backend:** Python + Flask
-- **RAG:** LangChain
-- **Vector DB:** **Chroma (local persistent)**
-- **Embeddings:** SentenceTransformers (HuggingFace)
-- **LLM:** OpenAI (same operational pattern as your existing legal chatbot)
-- **Frontend:** React (Vite) + Markdown rendering
+> ✅ No OpenAI API  
+> ✅ No internet required at runtime  
+> ✅ Works on CPU (GPU optional later)  
 
 ---
 
-## 1) Prerequisites
-- Python 3.10+
-- Node 18+
-- An OpenAI API key
+## 1. What This Application Does
+
+- Ingests **multiple Ramayana PDF files**
+- Splits text into semantic chunks
+- Creates embeddings and stores them in **ChromaDB**
+- Answers user questions using **retrieved context only**
+- Shows **source + page references** for transparency
+
+This avoids hallucinations and ensures answers are grounded in scripture.
 
 ---
 
-## 2) Backend setup
+## 2. High-Level Architecture
+
+```
+User (Browser)
+   ↓
+React Frontend (Chat UI)
+   ↓
+Flask Backend (API Layer)
+   ↓
+ChromaDB (Vector Search)
+   ↓
+llama.cpp (Local LLM, CPU)
+```
+
+---
+
+## 3. Technology Stack
+
+### Frontend
+- React (Vite)
+- Markdown rendering
+- Clean, Ramayana-themed UI
+
+### Backend
+- Flask + Flask-CORS
+- LangChain (retrieval & ingestion utilities)
+- ChromaDB (local vector store)
+- llama.cpp (local LLM inference)
+
+### Models
+- **LLM**: Mistral‑7B‑Instruct (GGUF, quantized)
+- **Embeddings**: SentenceTransformers
+
+---
+
+## 4. Project Structure
+
+```
+Ramayana-HelpBot/
+├── backend/
+│   ├── app.py
+│   ├── requirements.txt
+│   ├── .env
+│   ├── models/
+│   ├── data/
+│   └── src/
+│       ├── rag.py
+│       ├── helper.py
+│       ├── prompts.py
+│       └── llama_cpp_client.py
+├── frontend/
+│   ├── src/
+│   └── styles.css
+└── README.md
+```
+
+---
+
+## 5. Setup Instructions (CPU, Offline)
+
+### Backend
 
 ```bash
 cd backend
-
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Create `.env`:
+### Download Model
+
 ```bash
-cp .env.example .env
+mkdir backend/models
+wget https://huggingface.co/TheBloke/Mistral-7B-Instruct-v0.2-GGUF/resolve/main/mistral-7b-instruct-v0.2.Q4_K_M.gguf  -O backend/models/mistral-7b-instruct-v0.2.Q4_K_M.gguf
 ```
 
-Update:
-- `OPENAI_API_KEY`
-- Optionally `OPENAI_MODEL`, `EMBEDDING_MODEL`
+### Environment Variables
 
----
-
-## 3) Index PDFs (two ways)
-
-### Option A — Drop PDFs into `backend/data/` and run CLI ingestion
-Put your Valmiki Ramayana PDFs in:
-- `backend/data/`
-
-Then:
-```bash
-cd backend
-source .venv/bin/activate
-python ingest.py
+```env
+LLAMA_MODEL_PATH=./models/mistral-7b-instruct-v0.2.Q4_K_M.gguf
+LLAMA_N_CTX=4096
+LLAMA_N_THREADS=8
 ```
 
-### Option B — Upload PDFs from the UI
-Start the backend (Step 4), then use the left “Upload PDFs” panel in the UI.
-It calls:
-- `POST /api/ingest`
+### Run Backend
 
----
-
-## 4) Start backend server
 ```bash
-cd backend
-source .venv/bin/activate
 python app.py
 ```
 
-Health check:
-- http://localhost:8080/api/health
-
 ---
 
-## 5) Frontend setup
+## 6. Frontend Setup
+
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-Open:
-- http://localhost:5173
+---
 
-The Vite dev server proxies `/api/*` to `http://localhost:8080`.
+## 7. RAG Flow
+
+1. PDFs ingested and embedded
+2. Chunks stored in ChromaDB
+3. Query retrieves top-K chunks
+4. llama.cpp generates grounded answer
+5. Sources returned
 
 ---
 
-## 6) API reference
+## 8. Performance Notes
 
-### POST `/api/ingest`
-- Multipart form-data
-- Key: `files` (one or many PDFs)
-
-Response:
-```json
-{ "ok": true, "pages_loaded": 1200, "chunks_indexed": 3400 }
-```
-
-### POST `/api/chat`
-Request:
-```json
-{ "question": "Who is Hanuman and what are his key deeds?" }
-```
-
-Response:
-```json
-{
-  "answer": "....",
-  "sources": [
-    { "source_file": "valmiki_ramayana.pdf", "page": 123 }
-  ]
-}
-```
+- CPU-only inference is slow (2–6 minutes for long answers)
+- GPU reduces latency drastically
+- Designed for correctness first
 
 ---
 
-## License
-Use as you prefer for your learning and demonstration purposes.
+## 9. Future Upgrades
+
+- GPU acceleration
+- vLLM backend
+- Verse-level citations
+
+---
+
+## 10. Disclaimer
+
+Educational and research use only.
