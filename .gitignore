@@ -50,6 +50,7 @@ backend/.chroma/
 backend/data/*.pdf
 backend/data/*
 !backend/data/.gitkeep
+backend/models/*
 
 ############################################
 # Logs

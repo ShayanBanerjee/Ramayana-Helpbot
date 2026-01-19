@@ -34,7 +34,7 @@ def chat():
     if not question:
         return jsonify({"error": "Missing 'question'"}), 400
 
-    answer, sources = answer_question(question, retriever, k=5)
+    answer, sources = answer_question(question, retriever)
     return jsonify({"answer": answer, "sources": sources})
 
 @app.post("/api/ingest")
