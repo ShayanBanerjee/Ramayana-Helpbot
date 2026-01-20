@@ -6,6 +6,9 @@ langchain<1.0
 langchain-community<1.0
 langchain-text-splitters<1.0
 
+# Fix LangChain HuggingFaceEmbeddings deprecation path
+langchain-huggingface>=1.2.0
+
 pypdf==5.6.1
 sentence-transformers==4.1.0
 
@@ -14,3 +17,14 @@ langchain-chroma>=0.1.2
 
 # Offline LLM (CPU-first)
 llama-cpp-python>=0.2.24
+
+# ---- PyTorch CUDA pin for Pascal GPUs (GTX 1050 = sm_61) ----
+# Pull CUDA 12.6 wheels from the official PyTorch index:
+--extra-index-url https://download.pytorch.org/whl/cu126
+
+# Force the cu126 build (your current cu128 build drops sm_61)
+torch==2.9.1+cu126
+
+# Optional (only if you actually use them):
+# torchvision==0.24.1+cu126
+# torchaudio==2.9.1+cu126
