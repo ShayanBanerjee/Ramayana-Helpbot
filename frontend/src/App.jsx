@@ -21,6 +21,7 @@ import {
   Sparkles,
   Mail,
   Map as MapIcon,
+  Headphones,
 } from "lucide-react";
 import api from "./api";
 import AuthScreen from "./AuthScreen";
@@ -28,6 +29,7 @@ import ShlokaLibrary from "./ShlokaLibrary";
 import PromptLibrary from "./PromptLibrary";
 import ContactPanel from "./ContactPanel";
 import SacredMap from "./SacredMap";
+import AuraCleaning from "./AuraCleaning";
 import Logo from "./Logo";
 
 const THEME_KEY = "ramayana_helpbot_theme";
@@ -160,6 +162,7 @@ export default function App() {
   const [promptsOpen, setPromptsOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
   const [mapOpen, setMapOpen] = useState(false);
+  const [auraOpen, setAuraOpen] = useState(false);
   const [theme, setTheme] = useState(() => localStorage.getItem(THEME_KEY) || "system");
   const [veilOpacity, setVeilOpacity] = useState(() => {
     const stored = parseFloat(localStorage.getItem(VEIL_KEY));
@@ -441,6 +444,10 @@ export default function App() {
               <Mail size={16} />
               Contact
             </button>
+            <button className="navItem" onClick={() => setAuraOpen(true)}>
+              <Headphones size={16} />
+              Daily Aura Cleaning
+            </button>
             <p className="navHint">
               Answers are grounded in your indexed Valmiki Ramayana PDFs, with source and page citations.
             </p>
@@ -539,6 +546,16 @@ export default function App() {
                   ))}
                 </div>
 
+                <button className="auraBanner" onClick={() => setAuraOpen(true)} type="button">
+                  <span className="auraBannerIcon">
+                    <Headphones size={18} />
+                  </span>
+                  <span className="auraBannerText">
+                    <b>Daily Aura Cleaning</b>
+                    <span>10–15 minutes of uninterrupted Sanskrit chanting, for a quiet home and a quiet mind.</span>
+                  </span>
+                </button>
+
                 <div className="epigraphDivider" />
                 <p className="epigraph">धर्मो रक्षति रक्षितः — "Dharma protects those who protect it."</p>
               </div>
@@ -618,6 +635,7 @@ export default function App() {
       )}
       {contactOpen && <ContactPanel onClose={() => setContactOpen(false)} />}
       {mapOpen && <SacredMap onClose={() => setMapOpen(false)} onAsk={(text) => send(text)} />}
+      {auraOpen && <AuraCleaning onClose={() => setAuraOpen(false)} />}
     </>
   );
 }

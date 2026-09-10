@@ -1,11 +1,34 @@
-import React, { useState } from "react";
-import { X, MessageCircleQuestion, BookMarked } from "lucide-react";
+import React, { useRef, useState } from "react";
+import { X, MessageCircleQuestion, BookMarked, Play, Pause, Download, Headphones } from "lucide-react";
 import { PERSONAS, shlokasFor } from "./shlokas";
+import { CHANTS } from "./chants";
 
 export default function ShlokaLibrary({ onClose, onAsk }) {
   const [persona, setPersona] = useState(PERSONAS[0].id);
   const shlokas = shlokasFor(persona);
   const activePersona = PERSONAS.find((p) => p.id === persona);
+
+  const [chantId, setChantId] = useState(CHANTS[0].id);
+  const [playing, setPlaying] = useState(false);
+  const audioRef = useRef(null);
+  const chant = CHANTS.find((c) => c.id === chantId);
+
+  const pickChant = (id) => {
+    setChantId(id);
+    setPlaying(false);
+    // swap the <audio> source, then let the user press play again
+    requestAnimationFrame(() => audioRef.current?.load());
+  };
+
+  const togglePlay = () => {
+    const el = audioRef.current;
+    if (!el) return;
+    if (playing) {
+      el.pause();
+    } else {
+      el.play().catch(() => {});
+    }
+  };
 
   const ask = (s) => {
     onAsk(
@@ -31,6 +54,47 @@ export default function ShlokaLibrary({ onClose, onAsk }) {
           <button className="shlokaCloseBtn" onClick={onClose} title="Close">
             <X size={18} />
           </button>
+        </div>
+
+        <div className="audioModeBar">
+          <div className="audioModeHead">
+            <Headphones size={14} />
+            <span>Audio mode — devotional Sanskrit chants, not verse-matched recordings</span>
+          </div>
+          <div className="audioModeRow">
+            <button className="audioPlayBtn" onClick={togglePlay} type="button" title={playing ? "Pause" : "Play"}>
+              {playing ? <Pause size={15} /> : <Play size={15} />}
+            </button>
+            <div className="audioModeMeta">
+              <b>{chant.title}</b>
+              <span>{chant.blurb}</span>
+            </div>
+            <a className="audioDownloadBtn" href={chant.src} download title={`Download ${chant.title}`}>
+              <Download size={14} />
+            </a>
+          </div>
+          <div className="audioChantTabs">
+            {CHANTS.map((c) => (
+              <button
+                key={c.id}
+                type="button"
+                className={"audioChantTab" + (c.id === chantId ? " active" : "")}
+                onClick={() => pickChant(c.id)}
+              >
+                {c.title}
+              </button>
+            ))}
+          </div>
+          <audio
+            ref={audioRef}
+            src={chant.src}
+            onPlay={() => setPlaying(true)}
+            onPause={() => setPlaying(false)}
+            onEnded={() => setPlaying(false)}
+          />
+          <p className="audioModeAttribution">
+            {chant.license} — {chant.attribution}
+          </p>
         </div>
 
         <div className="shlokaTabs">
