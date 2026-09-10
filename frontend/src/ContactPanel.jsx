@@ -1,9 +1,8 @@
 import React from "react";
-import { X, Mail, Github, HeartHandshake, ShieldQuestion } from "lucide-react";
+import { X, Mail, HeartHandshake, ShieldQuestion } from "lucide-react";
 import Logo from "./Logo";
 
 const CONTACT_EMAIL = "shayanbanerjee96@gmail.com";
-const REPO_URL = "https://github.com/ShayanBanerjee/Ramayana-Helpbot";
 
 export default function ContactPanel({ onClose }) {
   return (
@@ -43,16 +42,6 @@ export default function ContactPanel({ onClose }) {
             <span className="contactRowText">
               <b>Email</b>
               <span>{CONTACT_EMAIL}</span>
-            </span>
-          </a>
-
-          <a className="contactRow" href={REPO_URL} target="_blank" rel="noreferrer">
-            <span className="contactRowIcon">
-              <Github size={16} />
-            </span>
-            <span className="contactRowText">
-              <b>Source code</b>
-              <span>github.com/ShayanBanerjee/Ramayana-Helpbot</span>
             </span>
           </a>
 

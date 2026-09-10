@@ -7,7 +7,7 @@
 # the Gita/Upanishads/Ramcharitmanas were added to the corpus, which silently
 # made the router refuse questions about texts that were actually indexed.
 SCOPE_PHRASE = (
-    "the Valmiki Ramayana and the Hindu scriptures connected to it — the Puranas, the "
+    "the Valmiki Ramayana and the Hindu scriptures connected to it — the Vedas, the Puranas, the "
     "Bhagavad Gita, the Upanishads, and the Ramcharitmanas"
 )
 
