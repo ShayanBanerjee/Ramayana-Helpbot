@@ -1,63 +1,91 @@
 import os
-import tempfile
+
 from dotenv import load_dotenv
-from flask import Flask, jsonify, request
+from flask import Flask
 from flask_cors import CORS
 
-from src.helper import download_embeddings_model
-from src.vectorstore import get_chroma_vectorstore
-from src.ingestion import ingest_pdfs_into_vectorstore
-from src.rag import answer_question
+from src.config import DevConfig
+from src.extensions import db, login_manager, oauth
+from src.models import User
 
-load_dotenv()
 
-app = Flask(__name__)
-CORS(app)
+def create_app(config_object=None):
+    load_dotenv()
 
-# Global init (same operational pattern as your existing app)
-embedding = download_embeddings_model(os.getenv("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2"))
-vectorstore = get_chroma_vectorstore(embedding)
-retriever = vectorstore.as_retriever(search_kwargs={"k": 5})
+    app = Flask(__name__)
+    app.config.from_object(config_object or DevConfig)
 
-@app.get("/api/health")
-def health():
-    return jsonify({
-        "ok": True,
-        "vector_db": "chroma",
-        "collection": os.getenv("CHROMA_COLLECTION", "ramayana_kb")
-    })
+    CORS(app, supports_credentials=True, origins=[app.config["FRONTEND_URL"]])
 
-@app.post("/api/chat")
-def chat():
-    payload = request.get_json(force=True)
-    question = (payload.get("question") or "").strip()
-    if not question:
-        return jsonify({"error": "Missing 'question'"}), 400
+    db.init_app(app)
+    login_manager.init_app(app)
+    oauth.init_app(app)
+    _register_oauth_providers(app)
 
-    answer, sources = answer_question(question, retriever, k=5)
-    return jsonify({"answer": answer, "sources": sources})
+    @login_manager.user_loader
+    def load_user(user_id):
+        return db.session.get(User, int(user_id))
 
-@app.post("/api/ingest")
-def ingest():
-    """Upload one or more PDFs and index them into Chroma."""
-    files = request.files.getlist("files")
-    if not files:
-        return jsonify({"error": "No files uploaded. Use form-data key 'files'."}), 400
+    @login_manager.unauthorized_handler
+    def unauthorized():
+        from flask import jsonify
+        return jsonify({"error": "Authentication required"}), 401
 
-    pdf_paths = []
-    with tempfile.TemporaryDirectory() as td:
-        for f in files:
-            name = f.filename or ""
-            if not name.lower().endswith(".pdf"):
-                return jsonify({"error": f"Only PDF supported. Got: {name}"}), 400
-            path = os.path.join(td, name)
-            f.save(path)
-            pdf_paths.append(path)
+    with app.app_context():
+        db.create_all()
 
-        doc_count, chunk_count = ingest_pdfs_into_vectorstore(pdf_paths, vectorstore)
+    if not app.config.get("SKIP_RAG_INIT"):
+        _init_rag(app)
 
-    return jsonify({"ok": True, "pages_loaded": doc_count, "chunks_indexed": chunk_count})
+    from src.auth import auth_bp
+    from src.chat import chat_bp
+
+    app.register_blueprint(auth_bp, url_prefix="/api/auth")
+    app.register_blueprint(chat_bp, url_prefix="/api")
+
+    return app
+
+
+def _register_oauth_providers(app):
+    if app.config.get("GOOGLE_CLIENT_ID"):
+        oauth.register(
+            name="google",
+            client_id=app.config["GOOGLE_CLIENT_ID"],
+            client_secret=app.config["GOOGLE_CLIENT_SECRET"],
+            server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",
+            client_kwargs={"scope": "openid email profile"},
+        )
+    if app.config.get("FACEBOOK_CLIENT_ID"):
+        oauth.register(
+            name="facebook",
+            client_id=app.config["FACEBOOK_CLIENT_ID"],
+            client_secret=app.config["FACEBOOK_CLIENT_SECRET"],
+            access_token_url="https://graph.facebook.com/oauth/access_token",
+            authorize_url="https://www.facebook.com/dialog/oauth",
+            api_base_url="https://graph.facebook.com/",
+            client_kwargs={"scope": "email public_profile"},
+        )
+
+
+def _init_rag(app):
+    """Loads the embedding model, opens Chroma, and builds the hybrid
+    BM25+vector retrieval index once at startup — kept off the request path
+    (and off the test suite, via SKIP_RAG_INIT) since it downloads/loads ML
+    models and reads the full vector store corpus into memory.
+    """
+    from src.helper import download_embeddings_model
+    from src.retrieval import HybridIndex
+    from src.vectorstore import get_chroma_vectorstore
+
+    embedding = download_embeddings_model(app.config["EMBEDDING_MODEL"])
+    vectorstore = get_chroma_vectorstore(embedding)
+    hybrid_index = HybridIndex(vectorstore, app.config["RERANKER_MODEL"])
+
+    app.extensions["vectorstore"] = vectorstore
+    app.extensions["hybrid_index"] = hybrid_index
+
 
 if __name__ == "__main__":
+    app = create_app()
     port = int(os.getenv("PORT", "8080"))
-    app.run(host="0.0.0.0", port=port, debug=True)
+    app.run(host="0.0.0.0", port=port, debug=app.config.get("DEBUG", False))

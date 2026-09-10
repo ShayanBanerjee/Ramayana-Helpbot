@@ -45,6 +45,12 @@ backend/.chromadb/
 backend/.chroma/
 
 ############################################
+# App database (users, sessions, chat history)
+############################################
+backend/*.db
+backend/instance/
+
+############################################
 # Uploaded / local data
 ############################################
 backend/data/*.pdf
