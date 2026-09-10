@@ -22,6 +22,10 @@ export const api = {
 
   googleLoginUrl: "/api/auth/google",
   facebookLoginUrl: "/api/auth/facebook",
+
+  adminStats: () => client.get("/admin/stats"),
+  getAdLevel: () => client.get("/admin/ad-level"),
+  setAdLevel: (level) => client.post("/admin/ad-level", { level }),
 };
 
 export default api;

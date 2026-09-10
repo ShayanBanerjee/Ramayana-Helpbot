@@ -38,7 +38,7 @@ def test_answer_question_smalltalk_skips_retrieval_and_returns_no_sources():
 
     assert answer == "Namaste! Ask me anything about Rama's story."
     assert sources == []
-    assert meta == {"intent": "smalltalk"}
+    assert meta == {"intent": "smalltalk", "tokens": {"input_tokens": 0, "output_tokens": 0, "total_tokens": 0}}
     assert hybrid_index.queries_seen == []  # no retrieval was performed
 
 

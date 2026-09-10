@@ -37,11 +37,13 @@ def create_app(config_object=None):
     if not app.config.get("SKIP_RAG_INIT"):
         _init_rag(app)
 
+    from src.admin import admin_bp
     from src.auth import auth_bp
     from src.chat import chat_bp
 
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
     app.register_blueprint(chat_bp, url_prefix="/api")
+    app.register_blueprint(admin_bp, url_prefix="/api/admin")
 
     return app
 

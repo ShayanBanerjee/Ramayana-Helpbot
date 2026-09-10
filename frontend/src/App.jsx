@@ -22,6 +22,8 @@ import {
   Mail,
   Map as MapIcon,
   Headphones,
+  LayoutDashboard,
+  Landmark,
 } from "lucide-react";
 import api from "./api";
 import AuthScreen from "./AuthScreen";
@@ -30,6 +32,9 @@ import PromptLibrary from "./PromptLibrary";
 import ContactPanel from "./ContactPanel";
 import SacredMap from "./SacredMap";
 import AuraCleaning from "./AuraCleaning";
+import AdminPanel from "./AdminPanel";
+import AdSlot from "./AdSlot";
+import AyodhyaSpecial from "./AyodhyaSpecial";
 import Logo from "./Logo";
 
 const THEME_KEY = "ramayana_helpbot_theme";
@@ -88,33 +93,88 @@ function displaySourceName(fileName) {
  */
 function AnimatedMarkdown({ text, animate }) {
   const [visibleChars, setVisibleChars] = useState(animate ? 0 : text.length);
+  const [done, setDone] = useState(!animate);
 
   useEffect(() => {
     if (!animate) return;
     setVisibleChars(0);
+    setDone(false);
+    // Reveal a few words per tick rather than one, so long answers don't
+    // drag the "generating" feel out well past when a reader has already
+    // caught up to the visible text.
+    const WORDS_PER_TICK = 3;
     const tokens = text.split(/(\s+)/);
     let i = 0;
     let charCount = 0;
     const interval = setInterval(() => {
       if (i >= tokens.length) {
         clearInterval(interval);
+        setDone(true);
         return;
       }
-      charCount += tokens[i].length;
+      for (let n = 0; n < WORDS_PER_TICK && i < tokens.length; n++) {
+        charCount += tokens[i].length;
+        i++;
+      }
       setVisibleChars(charCount);
-      i++;
     }, 28);
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [text, animate]);
 
-  return <ReactMarkdown>{animate ? text.slice(0, visibleChars) : text}</ReactMarkdown>;
+  const skip = () => {
+    if (!animate || done) return;
+    setVisibleChars(text.length);
+    setDone(true);
+  };
+
+  return (
+    <div onClick={skip} title={animate && !done ? "Click to show the full answer" : undefined}>
+      <ReactMarkdown>{animate && !done ? text.slice(0, visibleChars) : text}</ReactMarkdown>
+    </div>
+  );
+}
+
+/*
+ * The backend's USER_PROMPT_TEMPLATE (see src/prompts.py) always closes a
+ * RAMAYANA-branch answer with a "## You might also ask" heading followed by
+ * a short bullet list of follow-ups. Splitting that out of the raw markdown
+ * lets the frontend render those as clickable chips (matching the landing
+ * page's prompt cards) instead of inert text — mirrors how `sources` is
+ * already pulled out of the LLM's own output into a structured UI element
+ * rather than left as prose.
+ */
+function splitFollowUps(text) {
+  // The model is instructed to head this section with "## You might also
+  // ask" (see USER_PROMPT_TEMPLATE), but doesn't always follow the exact
+  // heading syntax — tolerate a missing "#", bold markers, and a trailing
+  // colon so the split still fires on those common variations.
+  const match = text.match(/(^|\n)#{0,6}\s*\*{0,2}you might also ask\*{0,2}:?\s*\n([\s\S]*)$/i);
+  if (!match) return { answer: text, followUps: [] };
+  const answer = text.slice(0, match.index).trim();
+  const followUps = match[2]
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => /^[-*]\s+/.test(line))
+    .map((line) => line.replace(/^[-*]\s+/, "").trim())
+    .filter(Boolean);
+  return { answer: answer || text, followUps };
 }
 
 function initials(name) {
   if (!name) return "?";
   const parts = name.trim().split(/\s+/);
   return ((parts[0]?.[0] || "") + (parts[1]?.[0] || "")).toUpperCase() || name[0].toUpperCase();
+}
+
+// A short rotation of authentic Rama/Hanuman salutations for the landing
+// greeting, rather than one fixed phrase forced to sit next to a raw first
+// name (which reads oddly for short names/initials). Cycles by day of
+// month rather than per-render/random, so it's stable across a visit but
+// still changes day to day.
+const SALUTATIONS = ["Jai Siya Ram", "Jai Shri Ram", "Jai Hanuman", "Ram Ram", "Jai Raghunandan"];
+function todaysSalutation() {
+  return SALUTATIONS[new Date().getDate() % SALUTATIONS.length];
 }
 
 /**
@@ -162,7 +222,10 @@ export default function App() {
   const [promptsOpen, setPromptsOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
   const [mapOpen, setMapOpen] = useState(false);
+  const [ayodhyaOpen, setAyodhyaOpen] = useState(false);
   const [auraOpen, setAuraOpen] = useState(false);
+  const [adminOpen, setAdminOpen] = useState(false);
+  const [adLevel, setAdLevel] = useState(0);
   const [theme, setTheme] = useState(() => localStorage.getItem(THEME_KEY) || "system");
   const [veilOpacity, setVeilOpacity] = useState(() => {
     const stored = parseFloat(localStorage.getItem(VEIL_KEY));
@@ -176,6 +239,15 @@ export default function App() {
       .me()
       .then((res) => setUser(res.data.user))
       .catch(() => setUser(null));
+  }, []);
+
+  useEffect(() => {
+    // Public endpoint (no auth) — every visitor needs this to know what, if
+    // anything, to render; only *changing* it is admin-gated.
+    api
+      .getAdLevel()
+      .then((res) => setAdLevel(res.data.level))
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -357,7 +429,7 @@ export default function App() {
         </button>
         <input
           className="input"
-          placeholder={busy ? "Working..." : "Ask about characters, events, themes, teachings..."}
+          placeholder={busy ? "Working..." : "Ask about Rama, Sita, Hanuman, dharma, the Gita, the Puranas..."}
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
           onKeyDown={(e) => {
@@ -388,7 +460,7 @@ export default function App() {
               <span className="brandIcon">
                 <Logo size={15} />
               </span>
-              Ramayana HelpBot
+              AyodhyaAI
               <button className="sidebarCloseBtn" onClick={() => setSidebarOpen(false)} title="Close">
                 <X size={15} />
               </button>
@@ -411,9 +483,6 @@ export default function App() {
               </div>
             ) : (
               <div className="guestRow">
-                <span className="guestPill" data-testid="guestCounterSidebar">
-                  <b>{guestInfo?.remaining ?? 5}</b> of {guestInfo?.limit ?? 5} free questions left
-                </span>
                 <button className="navItem primary" onClick={() => setAuthGate("voluntary")}>
                   <UserIcon size={16} />
                   Log in / Sign up
@@ -440,6 +509,10 @@ export default function App() {
               <MapIcon size={16} />
               Sacred Geography
             </button>
+            <button className="navItem" onClick={() => setAyodhyaOpen(true)}>
+              <Landmark size={16} />
+              Ayodhya Special
+            </button>
             <button className="navItem" onClick={() => setContactOpen(true)}>
               <Mail size={16} />
               Contact
@@ -448,10 +521,19 @@ export default function App() {
               <Headphones size={16} />
               Daily Aura Cleaning
             </button>
+            {user?.is_admin && (
+              <button className="navItem" onClick={() => setAdminOpen(true)}>
+                <LayoutDashboard size={16} />
+                Admin Dashboard
+              </button>
+            )}
             <p className="navHint">
-              Answers are grounded in your indexed Valmiki Ramayana PDFs, with source and page citations.
+              Every answer is grounded in the Valmiki Ramayana, the Bhagavad Gita, and the Puranas indexed
+              here — with source and page citations you can verify.
             </p>
           </nav>
+
+          <AdSlot slot="sidebar" level={adLevel} />
 
           <div className="sidebarFooter">
             <div className="sliderBlock">
@@ -486,7 +568,7 @@ export default function App() {
                 <span className="brandIcon" style={{ width: 24, height: 24, borderRadius: 7 }}>
                   <Logo size={13} />
                 </span>
-                Ramayana HelpBot
+                AyodhyaAI
               </div>
             </div>
 
@@ -520,10 +602,14 @@ export default function App() {
                 <div className="emblem">
                   <Logo size={28} />
                 </div>
-                <h1 className="landingTitle">Namaste, {user?.name?.split(" ")[0] || "traveller"}</h1>
+                <p className="landingEyebrow">ॐ श्री रामाय नमः</p>
+                <h1 className="landingTitle" data-testid="landingGreeting">
+                  {todaysSalutation()}
+                </h1>
                 <p className="landingSubtitle">
-                  A quiet space to reflect on the life of Rama — his trials, his companions, and the dharma
-                  he upheld. Every answer stays grounded in the text, with citations back to its source.
+                  Your companion through the Valmiki Ramayana, the Bhagavad Gita, and the Puranas — reflect
+                  on Rama's dharma, Sita's devotion, and Hanuman's service. Every answer stays grounded in
+                  scripture, with citations back to its source.
                 </p>
 
                 {renderComposer("landing")}
@@ -546,6 +632,8 @@ export default function App() {
                   ))}
                 </div>
 
+                <AdSlot slot="landing" level={adLevel} />
+
                 <button className="auraBanner" onClick={() => setAuraOpen(true)} type="button">
                   <span className="auraBannerIcon">
                     <Headphones size={18} />
@@ -561,24 +649,48 @@ export default function App() {
               </div>
             ) : (
               <div className="chatColumn">
-                {chat.map((m, idx) => (
+                {chat.map((m, idx) => {
+                  const { answer, followUps } =
+                    m.role === "assistant" ? splitFollowUps(m.content) : { answer: m.content, followUps: [] };
+                  return (
                   <div key={idx} className={"row " + (m.role === "user" ? "user" : "assistant")}>
                     <div className={"avatar " + (m.role === "user" ? "user" : "assistant")}>
                       {m.role === "user" ? <UserIcon size={15} /> : <Logo size={16} />}
                     </div>
                     <div className={"bubble " + (m.role === "user" ? "user" : "assistant")}>
                       <div className="meta">
-                        <span>{m.role === "user" ? (user?.name || "You") : "Ramayana HelpBot"}</span>
+                        <span>{m.role === "user" ? (user?.name || "You") : "AyodhyaAI"}</span>
                         <span>{nowTs(m.ts)}</span>
                       </div>
 
                       <div className="msgBody">
                         {m.role === "assistant" ? (
-                          <AnimatedMarkdown text={m.content} animate={m.animate} />
+                          <AnimatedMarkdown text={answer} animate={m.animate} />
                         ) : (
                           <div>{m.content}</div>
                         )}
                       </div>
+
+                      {m.role === "assistant" && followUps.length > 0 && (
+                        <div className="followUps">
+                          <b>
+                            <Sparkles size={12} /> You might also ask
+                          </b>
+                          <div className="followUpList">
+                            {followUps.map((q, i) => (
+                              <button
+                                key={i}
+                                type="button"
+                                className="followUpChip"
+                                disabled={busy}
+                                onClick={() => send(q)}
+                              >
+                                {q}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
 
                       {m.role === "assistant" && Array.isArray(m.sources) && m.sources.length > 0 && (
                         <div className="sources">
@@ -603,7 +715,8 @@ export default function App() {
                       )}
                     </div>
                   </div>
-                ))}
+                  );
+                })}
 
                 {busy && (
                   <div className="row assistant">
@@ -635,7 +748,13 @@ export default function App() {
       )}
       {contactOpen && <ContactPanel onClose={() => setContactOpen(false)} />}
       {mapOpen && <SacredMap onClose={() => setMapOpen(false)} onAsk={(text) => send(text)} />}
+      {ayodhyaOpen && (
+        <AyodhyaSpecial onClose={() => setAyodhyaOpen(false)} onAsk={(text) => send(text)} />
+      )}
       {auraOpen && <AuraCleaning onClose={() => setAuraOpen(false)} />}
+      {adminOpen && (
+        <AdminPanel onClose={() => setAdminOpen(false)} adLevel={adLevel} onAdLevelChange={setAdLevel} />
+      )}
     </>
   );
 }

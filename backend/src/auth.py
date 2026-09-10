@@ -1,5 +1,6 @@
 import re
 from datetime import datetime, timezone
+from functools import wraps
 
 from flask import Blueprint, current_app, jsonify, redirect, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
@@ -11,6 +12,23 @@ from src.models import Message, User
 auth_bp = Blueprint("auth", __name__)
 
 _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+
+
+def admin_required(fn):
+    """Gate a view to users whose email is in ADMIN_EMAILS (see
+    src/config.py). Stacks on top of login_required so an unauthenticated
+    caller gets the usual 401 (via the app-wide unauthorized_handler) before
+    admin status is even checked.
+    """
+
+    @wraps(fn)
+    @login_required
+    def wrapper(*args, **kwargs):
+        if not current_user.is_admin:
+            return jsonify({"error": "Admin access required"}), 403
+        return fn(*args, **kwargs)
+
+    return wrapper
 
 
 def _find_or_create_oauth_user(email: str, name: str, avatar_url: str, provider: str) -> User:

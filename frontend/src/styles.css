@@ -46,8 +46,15 @@
 
   --font: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   /* A formal, ceremonial register for titles and epigraphs only — body text
-     stays in --font for readability. System-stack, so no font download/FOUC. */
-  --font-serif: Georgia, Cambria, "Times New Roman", Times, serif;
+     stays in --font for readability. Cormorant Garamond loaded via Google
+     Fonts (index.html); the system stack after it is the fallback while it
+     loads (font-display: swap) or if the request ever fails. */
+  --font-serif: "Cormorant Garamond", Georgia, Cambria, "Times New Roman", Times, serif;
+  /* Devanagari needs its own family — a Latin serif stack renders none of
+     it. Noto Serif Devanagari for the same "formal/ceremonial" register as
+     --font-serif; falls back to the browser/OS's own Devanagari font
+     (present on every modern platform) rather than tofu if the request fails. */
+  --font-devanagari: "Noto Serif Devanagari", "Noto Sans Devanagari", serif;
 
   color-scheme: light;
 }
@@ -260,13 +267,14 @@ a { color: var(--accent-2); }
   font-family: var(--font);
   cursor: pointer;
   text-align: left;
-  transition: background 120ms ease, color 120ms ease;
+  transition: background 160ms cubic-bezier(0.2, 0.8, 0.2, 1), color 160ms ease, transform 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
-.navItem svg{ color: var(--muted); flex-shrink: 0; transition: color 120ms ease; }
-.navItem:hover{ background: rgba(var(--accent-rgb), 0.08); }
-.navItem:hover svg{ color: var(--accent); }
+.navItem svg{ color: var(--muted); flex-shrink: 0; transition: color 160ms ease, transform 160ms cubic-bezier(0.2, 0.8, 0.2, 1); }
+.navItem:hover{ background: rgba(var(--accent-rgb), 0.08); transform: translateX(2px); }
+.navItem:hover svg{ color: var(--accent); transform: scale(1.08); }
+.navItem:active{ transform: translateX(2px) scale(0.98); }
 .navItem:disabled{ opacity: 0.5; cursor: not-allowed; }
-.navItem:disabled:hover{ background: transparent; }
+.navItem:disabled:hover{ background: transparent; transform: none; }
 
 .navItem.primary{
   background: rgba(var(--accent-rgb), 0.10);
@@ -306,10 +314,12 @@ a { color: var(--accent-2); }
   font-weight: 650;
   font-family: var(--font);
   cursor: pointer;
-  transition: background 120ms ease;
+  transition: background 160ms ease, transform 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
-.themeToggle svg{ color: var(--muted); }
+.themeToggle svg{ color: var(--muted); transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1); }
 .themeToggle:hover{ background: rgba(var(--accent-rgb), 0.08); }
+.themeToggle:hover svg{ transform: rotate(24deg) scale(1.1); }
+.themeToggle:active{ transform: scale(0.98); }
 
 .sliderBlock{ padding: 9px 11px 4px; }
 .sliderLabel{
@@ -394,9 +404,10 @@ a { color: var(--accent-2); }
   justify-content: center;
   cursor: pointer;
   flex-shrink: 0;
-  transition: color 120ms ease, background 120ms ease;
+  transition: color 160ms ease, background 160ms ease, transform 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .logoutBtn:hover{ color: var(--bad); background: rgba(var(--bad-rgb), 0.10); }
+.logoutBtn:active{ transform: scale(0.92); }
 
 /* ============ Main panel ============ */
 .main{
@@ -473,9 +484,10 @@ a { color: var(--accent-2); }
   justify-content: center;
   cursor: pointer;
   flex-shrink: 0;
-  transition: color 120ms ease, background 120ms ease, border-color 120ms ease;
+  transition: color 160ms ease, background 160ms ease, border-color 160ms ease, transform 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .clearChatBtn:hover{ color: var(--bad); background: rgba(var(--bad-rgb), 0.10); border-color: rgba(var(--bad-rgb), 0.25); }
+.clearChatBtn:active:not(:disabled){ transform: scale(0.92); }
 .clearChatBtn:disabled{ opacity: 0.5; cursor: not-allowed; }
 
 .chat{
@@ -506,6 +518,14 @@ a { color: var(--accent-2); }
   align-items: center;
   gap: 20px;
   text-align: center;
+  animation: landingRise 620ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes landingRise{
+  from{ opacity: 0; transform: translateY(10px); }
+  to{ opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce){
+  .landingWrap{ animation: none; }
 }
 
 .emblem{
@@ -522,19 +542,39 @@ a { color: var(--accent-2); }
   box-shadow:
     var(--shadow-sm),
     inset 0 1px 0 rgba(255, 255, 255, 0.35),
-    0 0 32px rgba(var(--accent-rgb), 0.35);
+    0 0 0 6px rgba(var(--accent-rgb), 0.08),
+    0 0 40px rgba(var(--accent-rgb), 0.4);
+}
+
+.landingEyebrow{
+  margin: -4px 0 -10px;
+  font-family: var(--font-devanagari);
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  color: var(--accent);
+  opacity: 0.85;
 }
 
 .landingTitle{
   margin: 0;
   font-family: var(--font-serif);
-  font-size: 28px;
+  font-size: 32px;
   font-weight: 700;
   letter-spacing: -0.005em;
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  filter: drop-shadow(0 2px 20px rgba(var(--accent-rgb), 0.22));
+}
+
+.brandTagline{
+  margin: -8px 0 2px;
+  font-size: 12.5px;
+  font-weight: 650;
+  letter-spacing: 0.03em;
+  color: var(--accent);
+  text-transform: uppercase;
 }
 
 .landingSubtitle{
@@ -542,7 +582,7 @@ a { color: var(--accent-2); }
   color: var(--muted);
   font-size: 13.8px;
   line-height: 1.65;
-  max-width: 480px;
+  max-width: 500px;
 }
 
 .suggestGrid{
@@ -564,7 +604,7 @@ a { color: var(--accent-2); }
   border-radius: 14px;
   padding: 12px 13px;
   cursor: pointer;
-  transition: transform 120ms ease, background 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
+  transition: transform 160ms cubic-bezier(0.2, 0.8, 0.2, 1), background 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
 }
 .suggestChip:hover{
   transform: translateY(-1px);
@@ -572,6 +612,7 @@ a { color: var(--accent-2); }
   border-color: rgba(var(--accent-rgb), 0.28);
   box-shadow: var(--shadow-sm);
 }
+.suggestChip:active:not(:disabled){ transform: translateY(0) scale(0.99); }
 .suggestChip:disabled{ opacity: 0.55; cursor: not-allowed; transform: none; }
 
 .suggestIcon{
@@ -716,6 +757,41 @@ a { color: var(--accent-2); }
 .relevancePill.mid{ background: rgba(var(--accent-rgb), 0.14); color: var(--accent); }
 .relevancePill.low{ background: rgba(var(--bad-rgb), 0.12); color: var(--bad); }
 
+.followUps{
+  margin-top: 11px;
+  padding-top: 11px;
+  border-top: 1px dashed var(--border);
+}
+.followUps b{
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--text);
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.followUpList{ display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+.followUpChip{
+  text-align: left;
+  font: inherit;
+  font-size: 13px;
+  color: var(--text);
+  background: rgba(var(--accent-rgb), 0.06);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background 160ms cubic-bezier(0.2, 0.8, 0.2, 1), border-color 160ms ease, transform 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.followUpChip:hover:not(:disabled){
+  background: rgba(var(--accent-rgb), 0.12);
+  border-color: rgba(var(--accent-rgb), 0.3);
+  transform: translateX(2px);
+}
+.followUpChip:active:not(:disabled){ transform: translateX(2px) scale(0.99); }
+.followUpChip:disabled{ cursor: default; opacity: 0.6; }
+
 /* ============ Composer ============ */
 .composer{
   border-top: 1px solid var(--border);
@@ -763,6 +839,7 @@ a { color: var(--accent-2); }
   transition: transform 120ms ease, background 120ms ease, color 120ms ease;
 }
 .attachBtn:hover{ color: var(--accent); background: rgba(var(--accent-rgb), 0.10); transform: translateY(-1px); }
+.attachBtn:active{ transform: translateY(0) scale(0.94); }
 .attachBtn:disabled{ opacity: 0.5; cursor: not-allowed; transform: none; }
 
 .input{
@@ -847,7 +924,7 @@ a { color: var(--accent-2); }
 
 .epigraph{
   margin: 0;
-  font-family: var(--font-serif);
+  font-family: var(--font-devanagari), var(--font-serif);
   font-style: italic;
   font-size: 12.8px;
   color: var(--muted-2);
@@ -918,9 +995,11 @@ a { color: var(--accent-2); }
   font-size: 12.8px;
   font-family: var(--font);
   cursor: pointer;
-  transition: background 120ms ease, color 120ms ease;
+  transition: background 160ms cubic-bezier(0.2, 0.8, 0.2, 1), color 160ms ease, transform 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
+.authTab:hover:not(.active){ color: var(--text); }
 .authTab.active{ background: var(--card-strong); color: var(--accent); box-shadow: var(--shadow-sm); }
+.authTab:active{ transform: scale(0.97); }
 
 .oauthRow{
   display: flex;
@@ -945,9 +1024,10 @@ a { color: var(--accent-2); }
   font-family: var(--font);
   text-decoration: none;
   cursor: pointer;
-  transition: transform 120ms ease, background 120ms ease, box-shadow 120ms ease;
+  transition: transform 160ms cubic-bezier(0.2, 0.8, 0.2, 1), background 160ms ease, box-shadow 160ms ease;
 }
 .oauthBtn:hover{ transform: translateY(-1px); box-shadow: var(--shadow-sm); background: var(--card); }
+.oauthBtn:active{ transform: translateY(0) scale(0.98); }
 
 .oauthNotice{
   margin: 0;
@@ -1009,13 +1089,13 @@ a { color: var(--accent-2); }
   letter-spacing: 0.01em;
   cursor: pointer;
   box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  transition: transform 120ms ease, opacity 120ms ease, box-shadow 120ms ease;
+  transition: transform 160ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 160ms ease, box-shadow 160ms ease;
 }
 .btnPrimary:hover{
   transform: translateY(-1px);
   box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 0 20px rgba(var(--accent-rgb), 0.35);
 }
-.btnPrimary:active{ transform: translateY(0); }
+.btnPrimary:active{ transform: translateY(0) scale(0.98); }
 .btnPrimary:disabled{ opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: var(--shadow-sm); }
 
 .authFooterNote{
@@ -1063,20 +1143,25 @@ a { color: var(--accent-2); }
 .authCancelLink:hover{ color: var(--text); }
 
 /* ============ Guest indicator ============ */
+/* Deliberately understated — a quiet reminder, not a warning. Shown once,
+   in the chat window's own topbar, rather than duplicated in the sidebar
+   too; never red, even at zero remaining, since running out isn't an error
+   state, just a natural point to invite sign-in (the auth gate itself,
+   which does appear at that point, carries the actual call to action). */
 .guestPill{
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  font-size: 11.8px;
-  font-weight: 750;
-  padding: 6px 11px;
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 5px 10px;
   border-radius: 999px;
-  border: 1px solid rgba(var(--accent-rgb), 0.26);
-  background: rgba(var(--accent-rgb), 0.09);
-  color: var(--accent);
+  border: 1px solid var(--border-soft);
+  background: var(--panel-2);
+  color: var(--muted);
   white-space: nowrap;
 }
-.guestPill b{ font-weight: 800; }
+.guestPill b{ font-weight: 700; color: var(--muted); }
 
 .guestRow{
   display: flex;
@@ -1161,9 +1246,10 @@ a { color: var(--accent-2); }
   justify-content: center;
   cursor: pointer;
   flex-shrink: 0;
-  transition: color 120ms ease, background 120ms ease;
+  transition: color 160ms ease, background 160ms ease, transform 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
-.shlokaCloseBtn:hover{ color: var(--text); background: var(--card-strong); }
+.shlokaCloseBtn:hover{ color: var(--text); background: var(--card-strong); transform: rotate(90deg); }
+.shlokaCloseBtn:active{ transform: rotate(90deg) scale(0.9); }
 
 .shlokaTabs{ display: flex; gap: 8px; padding: 14px 22px 0; flex-wrap: wrap; }
 
@@ -1177,10 +1263,11 @@ a { color: var(--accent-2); }
   font-size: 12.5px;
   font-family: var(--font);
   cursor: pointer;
-  transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+  transition: background 160ms cubic-bezier(0.2, 0.8, 0.2, 1), color 160ms ease, border-color 160ms ease, transform 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .shlokaTab.active{ background: rgba(var(--accent-rgb), 0.12); color: var(--accent); border-color: rgba(var(--accent-rgb), 0.3); }
-.shlokaTab:hover{ background: var(--card-strong); }
+.shlokaTab:hover{ background: var(--card-strong); transform: translateY(-1px); }
+.shlokaTab:active{ transform: translateY(0) scale(0.96); }
 
 .shlokaPersonaBlurb{ margin: 10px 22px 0; font-size: 12.3px; color: var(--muted-2); font-style: italic; }
 
@@ -1221,6 +1308,7 @@ a { color: var(--accent-2); }
   line-height: 1.9;
   color: var(--text);
   font-weight: 600;
+  font-family: var(--font-devanagari);
 }
 .shlokaTransliteration{
   margin: 0 0 10px;
@@ -1267,9 +1355,10 @@ a { color: var(--accent-2); }
   font-weight: 800;
   font-family: var(--font);
   cursor: pointer;
-  transition: transform 120ms ease, background 120ms ease;
+  transition: transform 160ms cubic-bezier(0.2, 0.8, 0.2, 1), background 160ms ease;
 }
 .shlokaAskBtn:hover{ transform: translateY(-1px); background: rgba(var(--accent-2-rgb), 0.16); }
+.shlokaAskBtn:active{ transform: translateY(0) scale(0.97); }
 
 /* ============ Prompt library ============ */
 /* Flexbox-wrap, not grid: a grid container that's also a bounded flex item
@@ -1301,7 +1390,7 @@ a { color: var(--accent-2); }
   padding: 13px 14px;
   cursor: pointer;
   font-family: var(--font);
-  transition: transform 120ms ease, background 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
+  transition: transform 160ms cubic-bezier(0.2, 0.8, 0.2, 1), background 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
 }
 .promptCard:hover{
   transform: translateY(-1px);
@@ -1309,6 +1398,7 @@ a { color: var(--accent-2); }
   border-color: rgba(var(--accent-rgb), 0.28);
   box-shadow: var(--shadow-sm);
 }
+.promptCard:active{ transform: translateY(0) scale(0.99); }
 
 .promptCardIcon{
   width: 27px;
@@ -1427,8 +1517,9 @@ a.contactRow:hover{
 .contactEpigraph{ text-align: center; margin: 4px 0 0; }
 
 /* ---------------------------------------------------------------------
-   Sacred Geography map — an illustrated "quest map" (not a real geographic
-   projection) connecting the Ramayana's story-locations in narrative order.
+   Sacred Geography map — the Ramayana's story-locations plotted on a real
+   antique map (Hindoostan, Rennell 1782 — see sacredGeography.js), pan/zoom
+   handled with a CSS transform rather than a mapping library.
    --------------------------------------------------------------------- */
 .mapPanel{ max-width: 960px; }
 
@@ -1444,65 +1535,75 @@ a.contactRow:hover{
   padding: 18px;
   border-right: 1px solid var(--border-soft);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   overflow: auto;
 }
 
-.mapCanvas{
+.mapZoomWrap{
   position: relative;
   width: 100%;
-  max-width: 420px;
-  aspect-ratio: 4 / 5;
+  max-width: 460px;
+  aspect-ratio: 2730 / 2940;
   border-radius: var(--radius-lg);
-  background:
-    radial-gradient(120% 90% at 30% 0%, rgba(var(--accent-rgb), 0.16), transparent 60%),
-    radial-gradient(100% 80% at 80% 100%, rgba(var(--accent-2-rgb), 0.14), transparent 55%),
-    linear-gradient(160deg, var(--card), var(--panel));
   border: 1px solid var(--border-soft);
   box-shadow: inset 0 1px 0 var(--edge-highlight), inset 0 0 40px rgba(var(--accent-rgb), 0.06);
   flex-shrink: 0;
+  overflow: hidden;
+  touch-action: none;
+  background: var(--panel);
 }
 
-.mapLandmass{
-  fill: rgba(var(--accent-rgb), 0.15);
-  stroke: rgba(var(--accent-rgb), 0.4);
-  stroke-width: 0.35;
+.mapZoomInner{
+  position: absolute;
+  inset: 0;
+  transform-origin: 0 0;
 }
-.mapIsland{ fill: rgba(var(--accent-rgb), 0.17); }
 
-.mapDistancePill{
-  fill: var(--panel);
-  stroke: rgba(var(--accent-rgb), 0.3);
-  stroke-width: 0.25;
+.mapImage{
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  user-select: none;
+  -webkit-user-drag: none;
 }
-.mapDistanceLabel{
-  font-size: 2.3px;
-  font-weight: 700;
-  fill: var(--accent);
-  font-family: var(--font);
+
+.mapZoomControls{
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 3;
 }
+.mapZoomControls button{
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid var(--border-soft);
+  background: var(--card-strong);
+  color: var(--text);
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+  transition: background 160ms cubic-bezier(0.2, 0.8, 0.2, 1), color 160ms ease, transform 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.mapZoomControls button:hover{ background: rgba(var(--accent-rgb), 0.14); color: var(--accent); transform: scale(1.08); }
+.mapZoomControls button:active{ transform: scale(0.95); }
 
 .mapCanvasNote{
-  max-width: 420px;
+  max-width: 460px;
   margin: 8px 2px 0;
   font-size: 10.8px;
   color: var(--muted);
   font-style: italic;
   text-align: center;
 }
-
-.mapRoute{ position: absolute; inset: 0; width: 100%; height: 100%; }
-.mapRouteLine{
-  stroke: rgba(var(--accent-rgb), 0.5);
-  stroke-width: 0.55;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-dasharray: 2 1.6;
-  vector-effect: non-scaling-stroke;
-  animation: mapDashFlow 7s linear infinite;
-}
-@keyframes mapDashFlow{ to{ stroke-dashoffset: -24; } }
 
 .mapMarker{
   position: absolute;
@@ -1609,23 +1710,6 @@ a.contactRow:hover{
   line-height: 1.4;
 }
 
-.mapDetailStat{
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  padding: 9px 12px;
-  margin-bottom: 12px;
-  border-radius: var(--radius-lg);
-  background: rgba(var(--accent-rgb), 0.1);
-  border: 1px solid rgba(var(--accent-rgb), 0.22);
-  color: var(--accent);
-  font-size: 12px;
-  line-height: 1.5;
-}
-.mapDetailStat svg{ flex-shrink: 0; margin-top: 2px; }
-.mapDetailStat span{ color: var(--text); }
-.mapDetailStat b{ color: var(--accent); }
-
 .mapDetailEmpty{
   height: 100%;
   display: flex;
@@ -1726,9 +1810,10 @@ a.contactRow:hover{
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: color 120ms ease, background 120ms ease;
+  transition: color 160ms ease, background 160ms ease, transform 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .audioDownloadBtn:hover{ color: var(--accent); background: var(--card-strong); }
+.audioDownloadBtn:active{ transform: scale(0.92); }
 
 .audioChantTabs{ display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
 .audioChantTab{
@@ -1767,6 +1852,7 @@ a.contactRow:hover{
   transition: transform 140ms ease, box-shadow 140ms ease;
 }
 .auraBanner:hover{ transform: translateY(-1px); box-shadow: 0 6px 20px rgba(var(--accent-rgb), 0.15); }
+.auraBanner:active{ transform: translateY(0) scale(0.995); }
 .auraBannerIcon{
   width: 36px;
   height: 36px;
@@ -1849,9 +1935,289 @@ a.contactRow:hover{
   font-family: var(--font-serif);
 }
 .auraNowPlaying{ margin: 4px 0 0; font-weight: 700; color: var(--text); font-size: 14px; }
-.auraDevanagari{ margin: 0; font-size: 13px; color: var(--muted); text-align: center; }
+.auraDevanagari{ margin: 0; font-size: 13px; color: var(--muted); text-align: center; font-family: var(--font-devanagari); }
 .auraControls{ margin-top: 6px; }
 
 .auraDone{ display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; padding: 10px 0; }
 .auraDone svg{ color: var(--accent); }
-.auraDone p{ margin: 0; font-family: var(--font-serif); font-size: 15px; color: var(--text); }
+.auraDone p{ margin: 0; font-family: var(--font-devanagari), var(--font-serif); font-size: 15px; color: var(--text); }
+
+/* ---------------------------------------------------------------------
+   Admin dashboard — stats + the ad-level control. Same shlokaPanel chrome
+   as the other overlays, just wider (more to show) and its own scrollable
+   body rather than the two-column map/detail split.
+   --------------------------------------------------------------------- */
+.adminPanel{ max-width: 900px; }
+
+.adminBody{
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 18px 22px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.adminLoading{ margin: 0; color: var(--muted); font-size: 13px; text-align: center; padding: 20px 0; }
+.adminEmptyNote{ color: var(--muted); font-size: 12.5px; }
+
+.adminTiles{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.adminTile{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 13px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-soft);
+  background: var(--card);
+  transition: transform 160ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 160ms ease, border-color 160ms ease;
+}
+.adminTile:hover{ transform: translateY(-1px); box-shadow: var(--shadow-sm); border-color: rgba(var(--accent-rgb), 0.25); }
+
+.adminTileIcon{
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(var(--accent-rgb), 0.18), rgba(var(--accent-2-rgb), 0.18));
+  color: var(--accent);
+}
+
+.adminTileValue{ font-family: var(--font-serif); font-size: 19px; font-weight: 700; color: var(--text); line-height: 1.2; }
+.adminTileLabel{ font-size: 11.5px; color: var(--muted); margin-top: 1px; }
+
+.adminChartsRow{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 14px;
+}
+
+.adminChart{
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  padding: 12px 14px 10px;
+}
+.adminChart b{ display: block; font-size: 11.8px; color: var(--text); margin-bottom: 10px; }
+
+.adminBars{
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 64px;
+}
+.adminBar{
+  flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  min-width: 2px;
+}
+.adminBarFill{
+  width: 100%;
+  min-height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: linear-gradient(180deg, var(--accent-2), var(--accent));
+  transition: opacity 160ms ease;
+  opacity: 0.75;
+}
+.adminBar:hover .adminBarFill{ opacity: 1; }
+
+.adminSection{
+  border-top: 1px dashed var(--border);
+  padding-top: 14px;
+}
+.adminSection > b{ display: block; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text); margin-bottom: 10px; }
+
+.adminIntentRow{ display: flex; flex-wrap: wrap; gap: 8px; }
+.adminIntentPill{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(var(--accent-rgb), 0.09);
+  border: 1px solid rgba(var(--accent-rgb), 0.22);
+  color: var(--muted);
+  font-size: 12px;
+  text-transform: capitalize;
+}
+.adminIntentPill b{ color: var(--accent); }
+
+.adminTopQuestions{ list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.adminTopQuestions li{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 11px;
+  border-radius: var(--radius-md);
+  background: var(--panel-2);
+  font-size: 12.5px;
+}
+.adminTopQuestions li span{ color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.adminTopQuestions li b{ color: var(--accent); flex-shrink: 0; }
+
+.adminAdHint{ margin: 0 0 10px; font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+.adminAdLevels{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+}
+.adminAdLevelBtn{
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 13px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+  font-family: var(--font);
+  transition: transform 160ms cubic-bezier(0.2, 0.8, 0.2, 1), background 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+.adminAdLevelBtn span{ font-weight: 800; font-size: 13px; }
+.adminAdLevelBtn small{ color: var(--muted); font-size: 11.3px; line-height: 1.4; }
+.adminAdLevelBtn:hover:not(:disabled){ transform: translateY(-1px); box-shadow: var(--shadow-sm); border-color: rgba(var(--accent-rgb), 0.28); }
+.adminAdLevelBtn:active:not(:disabled){ transform: translateY(0) scale(0.99); }
+.adminAdLevelBtn:disabled{ opacity: 0.6; cursor: not-allowed; }
+.adminAdLevelBtn.active{
+  border-color: rgba(var(--accent-rgb), 0.45);
+  background: rgba(var(--accent-rgb), 0.1);
+  box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.25) inset;
+}
+.adminAdLevelBtn.active span{ color: var(--accent); }
+
+/* ---------------------------------------------------------------------
+   Placeholder ad slots — see AdSlot.jsx. Deliberately understated (never
+   mimics a real network's look) and always a passive static block, never
+   placed near the composer or inside the message list.
+   --------------------------------------------------------------------- */
+.adSlot{
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin: 10px 11px 0;
+  padding: 10px 11px;
+  border-radius: var(--radius-md);
+  border: 1px dashed var(--border);
+  background: var(--panel-2);
+  color: var(--muted-2);
+}
+.adSlot svg{ flex-shrink: 0; margin-top: 1px; color: var(--muted-2); }
+.adSlotText{ display: flex; flex-direction: column; gap: 1px; }
+.adSlotText b{
+  font-size: 9.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+.adSlotText span{ font-size: 11.5px; line-height: 1.4; }
+
+.adSlot[data-slot="landing"]{
+  width: 100%;
+  max-width: 620px;
+  margin: -6px auto 0;
+}
+
+/* ---------------------------------------------------------------------
+   Ayodhya Special — a text-only travel/significance guide (no per-site
+   photos are licensed for this one, unlike shlokas.js/sacredGeography.js),
+   same shlokaPanel chrome as the other overlays.
+   --------------------------------------------------------------------- */
+.ayodhyaPanel{ max-width: 760px; }
+
+.ayodhyaBody{
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 18px 22px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ayodhyaOverview{ margin: 0; font-size: 13.3px; line-height: 1.65; color: var(--text); }
+
+.ayodhyaPlaces{ display: flex; flex-direction: column; gap: 10px; }
+
+.ayodhyaPlace{
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  padding: 14px 16px;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+.ayodhyaPlace:hover{ border-color: rgba(var(--accent-rgb), 0.25); box-shadow: var(--shadow-sm); }
+
+.ayodhyaPlaceHead{ display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 6px; }
+.ayodhyaPlaceHead h3{ margin: 0; font-family: var(--font-serif); font-size: 17px; color: var(--text); }
+.ayodhyaPlaceTag{
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  background: rgba(var(--accent-rgb), 0.1);
+  border: 1px solid rgba(var(--accent-rgb), 0.22);
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.ayodhyaPlaceSummary{ margin: 0 0 8px; font-size: 12.8px; line-height: 1.6; color: var(--text); }
+.ayodhyaPlaceImportance{ margin: 0 0 6px; font-size: 12.3px; line-height: 1.55; color: var(--muted); }
+.ayodhyaPlaceImportance b{ color: var(--accent); }
+.ayodhyaPlaceTip{ margin: 0 0 10px; font-size: 11.8px; font-style: italic; color: var(--muted-2); }
+
+.ayodhyaAskBtn{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(var(--accent-2-rgb), 0.28);
+  background: rgba(var(--accent-2-rgb), 0.1);
+  color: var(--accent-2);
+  font-size: 11.5px;
+  font-weight: 800;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: transform 160ms cubic-bezier(0.2, 0.8, 0.2, 1), background 160ms ease;
+}
+.ayodhyaAskBtn:hover{ transform: translateY(-1px); background: rgba(var(--accent-2-rgb), 0.16); }
+.ayodhyaAskBtn:active{ transform: translateY(0) scale(0.97); }
+
+.ayodhyaPractical{
+  border-top: 1px dashed var(--border);
+  padding-top: 14px;
+}
+.ayodhyaPractical h3{ margin: 0 0 10px; font-family: var(--font-serif); font-size: 16px; color: var(--text); }
+
+.ayodhyaGettingThere{ display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
+.ayodhyaTravelRow{ display: flex; align-items: flex-start; gap: 9px; font-size: 12.5px; line-height: 1.55; color: var(--text); }
+.ayodhyaTravelRow b{ color: var(--accent); }
+.ayodhyaTravelIcon{
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: 7px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(var(--accent-rgb), 0.1);
+  color: var(--accent);
+  margin-top: 1px;
+}

@@ -19,6 +19,11 @@ class BaseConfig:
     FACEBOOK_CLIENT_ID = os.getenv("FACEBOOK_CLIENT_ID", "")
     FACEBOOK_CLIENT_SECRET = os.getenv("FACEBOOK_CLIENT_SECRET", "")
 
+    # Admin panel access: an allowlist rather than a DB flag, so granting/
+    # revoking access is a config change, not a migration. Empty by default
+    # — nobody is an admin until this is explicitly set.
+    ADMIN_EMAILS = [e.strip().lower() for e in os.getenv("ADMIN_EMAILS", "").split(",") if e.strip()]
+
     EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
     RERANKER_MODEL = os.getenv("RERANKER_MODEL", "cross-encoder/ms-marco-MiniLM-L-6-v2")
 

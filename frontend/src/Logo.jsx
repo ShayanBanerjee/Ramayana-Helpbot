@@ -21,7 +21,7 @@ export default function Logo({ size = 24, className }) {
       fill="none"
       className={className}
       role="img"
-      aria-label="Ramayana HelpBot"
+      aria-label="AyodhyaAI"
     >
       {/* left minor shikhara */}
       <path d="M2.6 16.2H6.4L5.5 12.6H3.5L2.6 16.2Z" fill="currentColor" opacity="0.85" />

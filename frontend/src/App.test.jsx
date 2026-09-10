@@ -14,6 +14,9 @@ vi.mock("./api", () => ({
     logout: vi.fn(),
     googleLoginUrl: "/api/auth/google",
     facebookLoginUrl: "/api/auth/facebook",
+    adminStats: vi.fn(),
+    getAdLevel: vi.fn().mockResolvedValue({ data: { level: 0 } }),
+    setAdLevel: vi.fn(),
   },
 }));
 
@@ -34,9 +37,9 @@ describe("App", () => {
     render(<App />);
 
     // No login wall — straight into the landing/chat screen.
-    expect(await screen.findByText(/namaste, traveller/i)).toBeInTheDocument();
+    expect(await screen.findByTestId("landingGreeting")).toBeInTheDocument();
     expect(screen.queryByTestId("authSubmit")).not.toBeInTheDocument();
-    expect(screen.getByText(/5.*free questions left/i)).toBeInTheDocument();
+    expect(screen.getByTestId("guestCounterTopbar")).toHaveTextContent("5/5 free");
   });
 
   it("shows the landing screen with suggestion chips once authenticated", async () => {
@@ -44,7 +47,7 @@ describe("App", () => {
     api.history.mockResolvedValueOnce({ data: { messages: [] } });
     render(<App />);
 
-    expect(await screen.findByText(/namaste, sita/i)).toBeInTheDocument();
+    expect(await screen.findByTestId("landingGreeting")).toBeInTheDocument();
     expect(screen.getByText(/who is hanuman/i)).toBeInTheDocument();
     expect(screen.getByText(USER.email)).toBeInTheDocument();
   });
@@ -102,11 +105,11 @@ describe("App", () => {
     const user = userEvent.setup();
     render(<App />);
 
-    await screen.findByText(/namaste, sita/i);
+    await screen.findByTestId("landingGreeting");
     await user.click(screen.getByTitle(/log out/i));
 
     expect(api.logout).toHaveBeenCalled();
-    expect(await screen.findByText(/namaste, traveller/i)).toBeInTheDocument();
+    expect(await screen.findByTestId("landingGreeting")).toBeInTheDocument();
     expect(screen.getByText(/log in \/ sign up/i)).toBeInTheDocument();
   });
 
@@ -117,7 +120,7 @@ describe("App", () => {
     const user = userEvent.setup();
     render(<App />);
 
-    await screen.findByText(/namaste, sita/i);
+    await screen.findByTestId("landingGreeting");
     const toggle = screen.getByText(/dark mode|light mode/i);
     await user.click(toggle);
 
@@ -130,7 +133,7 @@ describe("App", () => {
     api.history.mockResolvedValueOnce({ data: { messages: [] } });
     render(<App />);
 
-    await screen.findByText(/namaste, sita/i);
+    await screen.findByTestId("landingGreeting");
     const slider = screen.getByRole("slider");
     fireEvent.change(slider, { target: { value: "0.2" } });
 
@@ -147,7 +150,7 @@ describe("App", () => {
     const user = userEvent.setup();
     render(<App />);
 
-    await screen.findByText(/namaste, sita/i);
+    await screen.findByTestId("landingGreeting");
     await user.click(screen.getByText(/sanskrit shlokas/i));
 
     expect(await screen.findByText("Sanskrit Shloka Library")).toBeInTheDocument();
@@ -170,7 +173,7 @@ describe("App", () => {
     const user = userEvent.setup();
     render(<App />);
 
-    await screen.findByText(/namaste, sita/i);
+    await screen.findByTestId("landingGreeting");
     await user.click(screen.getByText(/prompt library/i));
 
     // "Prompt Library" (and "Who is Hanuman") also appear behind the modal —

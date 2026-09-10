@@ -63,6 +63,25 @@ export default function AuraCleaning({ onClose }) {
 
   const audioRef = useRef(null);
   const tickRef = useRef(null);
+  const repeatLeftRef = useRef(CHANTS[0].repeat);
+  const fadeRef = useRef(null);
+
+  // A quick fade-in on every (re)start, in place of an abrupt attack —
+  // meaningfully smoother for a meditative listening session, especially
+  // across the frequent in-place repeats of the short mantras.
+  const fadeIn = () => {
+    const el = audioRef.current;
+    if (!el) return;
+    cancelAnimationFrame(fadeRef.current);
+    const start = performance.now();
+    const step = (now) => {
+      const t = Math.min(1, (now - start) / 350);
+      el.volume = t;
+      if (t < 1) fadeRef.current = requestAnimationFrame(step);
+    };
+    el.volume = 0;
+    fadeRef.current = requestAnimationFrame(step);
+  };
 
   useEffect(() => {
     if (!running) return;
@@ -88,24 +107,49 @@ export default function AuraCleaning({ onClose }) {
   }, [remainingSec, running]);
 
   useEffect(() => {
-    if (running) audioRef.current?.play().catch(() => {});
+    if (running) {
+      audioRef.current?.play().catch(() => {});
+      fadeIn();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chantIdx, running]);
 
   const start = () => {
     setCompleted(false);
     setRemainingSec(durationMin * 60);
     setChantIdx(0);
+    repeatLeftRef.current = CHANTS[0].repeat;
     setRunning(true);
-    requestAnimationFrame(() => audioRef.current?.play().catch(() => {}));
+    requestAnimationFrame(() => {
+      audioRef.current?.play().catch(() => {});
+      fadeIn();
+    });
   };
 
   const stop = () => {
     setRunning(false);
     audioRef.current?.pause();
+    cancelAnimationFrame(fadeRef.current);
   };
 
   const onTrackEnded = () => {
-    setChantIdx((i) => (i + 1) % CHANTS.length);
+    repeatLeftRef.current -= 1;
+    if (repeatLeftRef.current > 0) {
+      // Same mantra again, in place — a short japa-style repetition rather
+      // than jumping straight to a different chant.
+      const el = audioRef.current;
+      if (el) {
+        el.currentTime = 0;
+        el.play().catch(() => {});
+        fadeIn();
+      }
+      return;
+    }
+    setChantIdx((i) => {
+      const next = (i + 1) % CHANTS.length;
+      repeatLeftRef.current = CHANTS[next].repeat;
+      return next;
+    });
   };
 
   const chant = CHANTS[chantIdx];

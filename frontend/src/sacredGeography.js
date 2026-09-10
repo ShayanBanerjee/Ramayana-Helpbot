@@ -1,19 +1,16 @@
 /**
- * Curated waypoints of the Ramayana's story-geography, in narrative order.
- * `x`/`y` are hand-placed percentage coordinates on the illustrated map
- * canvas (not a geographic projection — this is a simple, stylized map,
- * not a GIS tool). Modern-place identifications and "folklore" notes are
+ * Curated waypoints of the Ramayana's story-geography. `x`/`y` are
+ * hand-placed percentage coordinates on `/public/sacred-map.jpg` (Hindoostan,
+ * James Rennell, 1782 — public domain, Wikimedia Commons), calibrated by
+ * locating each place's real modern coordinates against labelled cities and
+ * regions visible on that map (e.g. Ayodhya against "Fyzabad, Oude";
+ * Kishkindha against "Killtura Bijnagur", the period spelling of
+ * Vijayanagar/Hampi) — not a precise geodetic projection, since the source
+ * map itself isn't one, but placed by eye against real reference points
+ * rather than guessed. Modern-place identifications and "folklore" notes are
  * phrased as tradition/local belief, not asserted historical fact, in
  * keeping with the assistant's own "respectful, neutral tone; avoid
  * sectarian claims" rule (see backend/src/prompts.py).
- *
- * `distanceFromPrevKm` is a straight-line (haversine, "as the crow flies")
- * distance from the previous waypoint in the route, computed from each
- * place's real modern coordinates — not a scriptural claim about the exact
- * path taken, which followed terrain and isn't precisely recorded.
- * `footDays` is illustrative only: distance ÷ ~25 km/day, a commonly cited
- * pre-modern travel pace for a large group on foot. Both are clearly
- * labeled as estimates in the UI, not presented as historical fact.
  */
 export const SACRED_PLACES = [
   {
@@ -21,12 +18,10 @@ export const SACRED_PLACES = [
     name: "Ayodhya",
     modern: "Ayodhya, Uttar Pradesh, India",
     era: "Birth & Return",
-    x: 44,
-    y: 9,
+    x: 55.5,
+    y: 15.6,
     image: "/places/ayodhya.jpg",
     imageCaption: "The rebuilt Ram Mandir in Ayodhya, on the Sarayu river.",
-    distanceFromPrevKm: 0,
-    footDays: 0,
     summary:
       "Capital of the Kosala kingdom on the Sarayu river — the birthplace and throne of Rama, and the city he returned to after fourteen years of exile. The Ramayana opens and closes here: Book I (Balakanda) begins with King Dasharatha's court, and Book VI (Yuddhakanda) ends with Rama's coronation, Pattabhisheka.",
     folklore:
@@ -37,12 +32,10 @@ export const SACRED_PLACES = [
     name: "Janakpur (Mithila)",
     modern: "Janakpur, Madhesh Province, Nepal",
     era: "Sita's Birth & Wedding",
-    x: 66,
-    y: 12,
+    x: 66.6,
+    y: 15.1,
     image: "/places/janakpur.jpg",
     imageCaption: "Janaki Mandir, Janakpur — built where tradition holds Sita's birthplace stood.",
-    distanceFromPrevKm: 370,
-    footDays: 15,
     summary:
       "Capital of King Janaka's Videha kingdom — Sita's birthplace, and where Rama won her hand by stringing Shiva's great bow at her swayamvara. Not on the main exile route (it's a spur north-east of Ayodhya), but essential to the story's start.",
     folklore:
@@ -53,12 +46,10 @@ export const SACRED_PLACES = [
     name: "Prayag",
     modern: "Prayagraj, Uttar Pradesh, India",
     era: "Early Exile",
-    x: 42,
-    y: 22,
+    x: 53.9,
+    y: 23.3,
     image: "/places/prayag.jpg",
     imageCaption: "The riverside at the Ganga–Yamuna confluence, Prayagraj.",
-    distanceFromPrevKm: 155,
-    footDays: 6,
     summary:
       "Site of sage Bharadwaja's ashram, at the sacred confluence (sangam) of the Ganga and Yamuna — the first stop after crossing the Ganga on leaving Ayodhya, where the three were received and guided onward toward Chitrakoot.",
     folklore:
@@ -69,12 +60,10 @@ export const SACRED_PLACES = [
     name: "Chitrakoot",
     modern: "Chitrakoot, on the Uttar Pradesh–Madhya Pradesh border, India",
     era: "Early Exile",
-    x: 33,
-    y: 37,
+    x: 48.9,
+    y: 22.8,
     image: "/places/chitrakoot.jpg",
     imageCaption: "Ramghat, on the Mandakini river at Chitrakoot.",
-    distanceFromPrevKm: 105,
-    footDays: 4,
     summary:
       "A forest retreat on the Mandakini river, on Bharadwaja's advice, where Rama, Sita, and Lakshmana settled for part of their exile — and where Bharata came bearing their father's sandals to plead for Rama's return. Rama sent him back with the sandals as a symbol of his rule in his stead.",
     folklore:
@@ -85,12 +74,10 @@ export const SACRED_PLACES = [
     name: "Panchavati",
     modern: "Nashik, Maharashtra, India",
     era: "Later Exile",
-    x: 32,
-    y: 48,
+    x: 20.4,
+    y: 40.7,
     image: "/places/panchavati.jpg",
     imageCaption: "The Godavari ghats at Panchavati, Nashik.",
-    distanceFromPrevKm: 926,
-    footDays: 37,
     summary:
       "Where the three built their forest dwelling under five banyan trees on the Godavari river — the longest single stretch of the exile. The site of the encounter with Shurpanakha (Ravana's sister) and, from nearby, Sita's abduction by Ravana disguised as a mendicant.",
     folklore:
@@ -101,13 +88,11 @@ export const SACRED_PLACES = [
     name: "Kishkindha",
     modern: "Hampi & Anegundi, Karnataka, India",
     era: "Alliance & Search",
-    x: 31,
-    y: 64,
+    x: 29.6,
+    y: 59.6,
     special: "hanuman",
     image: "/places/kishkindha.jpg",
     imageCaption: "The hills of Anjanadri, near Hampi and Anegundi — the traditional Kishkindha.",
-    distanceFromPrevKm: 591,
-    footDays: 24,
     summary:
       "The vanara kingdom of Sugriva, where Rama allied with Sugriva and Hanuman after helping Sugriva reclaim his throne from his brother Vali — and from where search parties set out in every direction to find Sita, with Hanuman's southern party ultimately succeeding.",
     folklore:
@@ -118,42 +103,27 @@ export const SACRED_PLACES = [
     name: "Rameswaram",
     modern: "Rameswaram, Tamil Nadu, India",
     era: "The Crossing",
-    x: 39,
-    y: 84,
+    x: 46.5,
+    y: 84.5,
     image: "/places/rameswaram.jpg",
     imageCaption: "The eastern gopuram of Ramanathaswamy Temple, Rameswaram.",
-    distanceFromPrevKm: 740,
-    footDays: 30,
     summary:
       "Where Rama is said to have worshipped Shiva to atone for the coming war before the vanara army, led by the engineer Nala, built Rama Setu — a bridge of floating stones across the strait to Lanka.",
     folklore:
-      "The Ramanathaswamy Temple enshrines this tradition, and the chain of limestone shoals stretching toward Sri Lanka is popularly known as Rama Setu, or Adam's Bridge — visible as a pale underwater ridge in satellite images of the strait.",
+      "The Ramanathaswamy Temple enshrines this tradition, and the chain of limestone shoals stretching toward Sri Lanka is popularly known as Rama Setu, or Adam's Bridge — visible as a pale underwater ridge in satellite images of the strait, and marked on the 1782 map itself as \"Adam's Bridge.\"",
   },
   {
     id: "lanka",
     name: "Lanka",
     modern: "Sri Lanka",
     era: "The War",
-    x: 47,
-    y: 93,
+    x: 48.7,
+    y: 90.6,
     image: "/places/lanka.jpg",
     imageCaption: "Seetha Amman Temple at Seetha Eliya, near Nuwara Eliya — a traditional Ashok Vatika site.",
-    distanceFromPrevKm: 73,
-    footDays: 3,
     summary:
       "Ravana's island kingdom, and the site of the climactic battle that freed Sita and ended in Ravana's defeat by Rama, with the aid of Sugriva's vanara army and Vibhishana, Ravana's own brother, who defected to Rama's side.",
     folklore:
       "Several sites across modern Sri Lanka are locally associated by pilgrims with events from this part of the story — including the Seetha Amman Temple (pictured) near Nuwara Eliya, close to a garden tradition holds was Ashok Vatika, where Sita was held.",
   },
-];
-
-/** Ayodhya -> Prayag -> Chitrakoot -> Panchavati -> Kishkindha -> Rameswaram -> Lanka. */
-export const MAIN_ROUTE_IDS = [
-  "ayodhya",
-  "prayag",
-  "chitrakoot",
-  "panchavati",
-  "kishkindha",
-  "rameswaram",
-  "lanka",
 ];

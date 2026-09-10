@@ -1,5 +1,6 @@
 import json
 
+from flask import current_app
 from flask_login import UserMixin
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -30,6 +31,13 @@ class User(UserMixin, db.Model):
     def check_password(self, raw_password: str) -> bool:
         return bool(self.password_hash) and check_password_hash(self.password_hash, raw_password)
 
+    @property
+    def is_admin(self) -> bool:
+        """Config-driven, not a DB column — see ADMIN_EMAILS in src/config.py.
+        Granting/revoking admin access is then an env change, not a migration.
+        """
+        return self.email.lower() in current_app.config.get("ADMIN_EMAILS", [])
+
     def to_public_dict(self) -> dict:
         return {
             "id": self.id,
@@ -37,6 +45,7 @@ class User(UserMixin, db.Model):
             "name": self.name,
             "avatar_url": self.avatar_url,
             "provider": self.provider,
+            "is_admin": self.is_admin,
         }
 
 
@@ -104,3 +113,17 @@ class Message(db.Model):
             "meta": json.loads(self.meta_json) if self.meta_json else None,
             "ts": self.created_at.isoformat() if self.created_at else None,
         }
+
+
+class AppSetting(db.Model):
+    """A tiny key/value store for app-wide settings that must be shared
+    across every visitor and survive restarts (unlike a per-browser
+    localStorage value) — currently just the ad-display level. One row per
+    setting; read/write by key rather than modeling each setting as its own
+    column, since this is expected to stay small and admin-managed.
+    """
+
+    __tablename__ = "app_settings"
+
+    key = db.Column(db.String(64), primary_key=True)
+    value = db.Column(db.Text, nullable=False)

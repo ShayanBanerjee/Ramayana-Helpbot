@@ -79,9 +79,11 @@ export default function AuthScreen({ onAuthed, gateReason, onCancel, guestLimit 
           <div className="emblem authEmblem">
             <Logo size={24} />
           </div>
-          <h1 className="landingTitle">Ramayana HelpBot</h1>
+          <h1 className="landingTitle">AyodhyaAI</h1>
+          <p className="brandTagline">Your AI Guide to the Ramayana, the Gita &amp; the Puranas</p>
           <p className="landingSubtitle">
-            Sign in to keep this conversation, your indexed texts, and their citations with you across visits.
+            Sign in to carry this conversation with you — your indexed texts and citations, saved across
+            visits. Jai Siya Ram.
           </p>
 
           {gateReason === "forced" && (

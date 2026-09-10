@@ -16,6 +16,9 @@ vi.mock("./api", () => ({
     signup: vi.fn(),
     googleLoginUrl: "/api/auth/google",
     facebookLoginUrl: "/api/auth/facebook",
+    adminStats: vi.fn(),
+    getAdLevel: vi.fn().mockResolvedValue({ data: { level: 0 } }),
+    setAdLevel: vi.fn(),
   },
 }));
 
@@ -76,7 +79,7 @@ describe("Guest flow", () => {
 
     await screen.findByText("Earlier question");
 
-    const input = screen.getByPlaceholderText(/ask about characters/i);
+    const input = screen.getByPlaceholderText(/ask about rama/i);
     await user.type(input, "One more question");
     const sendBtn = screen.getByTitle("Send");
     await user.click(sendBtn);
@@ -99,7 +102,7 @@ describe("Guest flow", () => {
     expect(await screen.findByTestId("authSubmit")).toBeInTheDocument();
 
     await user.click(screen.getByText(/continue as guest/i));
-    expect(await screen.findByText(/namaste, traveller/i)).toBeInTheDocument();
+    expect(await screen.findByTestId("landingGreeting")).toBeInTheDocument();
   });
 
   it("resumes as the authenticated user after signing in from the gate, via fresh server history", async () => {
@@ -114,7 +117,7 @@ describe("Guest flow", () => {
     const user = userEvent.setup();
     render(<App />);
 
-    await screen.findByText(/namaste, traveller/i);
+    await screen.findByTestId("landingGreeting");
     const chip = await screen.findByText(/who is hanuman/i);
     await user.click(chip.closest("button"));
     await screen.findByTestId("authSubmit");

@@ -30,9 +30,9 @@ export default function ContactPanel({ onClose }) {
               <Logo size={22} />
             </div>
             <p>
-              Ramayana HelpBot is a Retrieval-Augmented Generation assistant grounded in the Valmiki
-              Ramayana and the Hindu scriptures connected to it. Every answer is traced back to the
-              indexed text it came from — nothing is invented.
+              AyodhyaAI is a Retrieval-Augmented Generation assistant grounded in the Valmiki
+              Ramayana, the Bhagavad Gita, and the Puranas connected to its world. Every answer is traced
+              back to the indexed verse or page it came from — nothing is invented.
             </p>
           </div>
 

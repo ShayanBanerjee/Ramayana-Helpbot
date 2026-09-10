@@ -52,6 +52,19 @@ def _sources_from_scored_docs(scored_docs) -> List[Dict[str, Any]]:
     return sorted(best_by_key.values(), key=lambda s: s["relevance"], reverse=True)
 
 
+def _usage_from(resp) -> Dict[str, int]:
+    """Pulls token counts off a LangChain AIMessage's `usage_metadata` (set
+    by ChatOpenAI on real calls). Missing/absent on FakeLLM responses in
+    tests, so this degrades to zeros rather than raising.
+    """
+    u = getattr(resp, "usage_metadata", None) or {}
+    return {
+        "input_tokens": u.get("input_tokens", 0),
+        "output_tokens": u.get("output_tokens", 0),
+        "total_tokens": u.get("total_tokens", 0),
+    }
+
+
 def _make_llm() -> ChatOpenAI:
     return ChatOpenAI(
         model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
@@ -114,7 +127,7 @@ def answer_question(
 
     if intent == "SMALLTALK":
         resp = llm.invoke(SMALLTALK_SYSTEM_PROMPT.format(question=question))
-        return resp.content, [], {"intent": "smalltalk"}
+        return resp.content, [], {"intent": "smalltalk", "tokens": _usage_from(resp)}
 
     search_query = contextualize_question(question, history or [], llm=llm)
     scored_docs = hybrid_index.retrieve(
@@ -136,5 +149,6 @@ def answer_question(
         "search_query": search_query,
         "chunk_count": len(scored_docs),
         "top_relevance": round(max((s for _, s in scored_docs), default=0.0), 3),
+        "tokens": _usage_from(resp),
     }
     return resp.content, sources, meta
