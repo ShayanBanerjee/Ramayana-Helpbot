@@ -24,6 +24,7 @@ import {
   Headphones,
   LayoutDashboard,
   Landmark,
+  Orbit,
 } from "lucide-react";
 import api from "./api";
 import AuthScreen from "./AuthScreen";
@@ -196,10 +197,10 @@ const PROMPT_CARDS = [
     prompt: "What are the events leading to Rama's exile, and what does it teach about duty over comfort?",
   },
   {
-    icon: <Feather size={15} />,
-    lead: "Summarize the Balakanda",
-    rest: "in a few key events",
-    prompt: "Summarize the Balakanda in a few key events.",
+    icon: <Orbit size={15} />,
+    lead: "Worlds beyond ours",
+    rest: "— what does the Ramayana say about other lokas?",
+    prompt: "Does the Valmiki Ramayana describe multiple worlds or lokas, and what does it actually say about them?",
   },
   {
     icon: <Swords size={15} />,
@@ -460,7 +461,7 @@ export default function App() {
               <span className="brandIcon">
                 <Logo size={15} />
               </span>
-              AyodhyaAI
+              Grantha
               <button className="sidebarCloseBtn" onClick={() => setSidebarOpen(false)} title="Close">
                 <X size={15} />
               </button>
@@ -568,7 +569,7 @@ export default function App() {
                 <span className="brandIcon" style={{ width: 24, height: 24, borderRadius: 7 }}>
                   <Logo size={13} />
                 </span>
-                AyodhyaAI
+                Grantha
               </div>
             </div>
 
@@ -603,6 +604,11 @@ export default function App() {
                   <Logo size={28} />
                 </div>
                 <p className="landingEyebrow">ॐ श्री रामाय नमः</p>
+                <p className="landingWordmark" aria-label="Grantha — ग्रन्थ">
+                  <span className="wordmarkDeva">ग्रन्थ</span>
+                  <span className="wordmarkDot" aria-hidden="true" />
+                  <span className="wordmarkLatin">Grantha</span>
+                </p>
                 <h1 className="landingTitle" data-testid="landingGreeting">
                   {todaysSalutation()}
                 </h1>
@@ -613,6 +619,12 @@ export default function App() {
                 </p>
 
                 {renderComposer("landing")}
+
+                <ul className="trustStrip" aria-label="Why you can trust Grantha">
+                  <li><BookMarked size={13} /> Cited to the page</li>
+                  <li><Landmark size={13} /> 11+ sacred texts</li>
+                  <li><Sparkles size={13} /> Never invents verses</li>
+                </ul>
 
                 <div className="suggestGrid">
                   {PROMPT_CARDS.map((p) => (
@@ -659,8 +671,19 @@ export default function App() {
                     </div>
                     <div className={"bubble " + (m.role === "user" ? "user" : "assistant")}>
                       <div className="meta">
-                        <span>{m.role === "user" ? (user?.name || "You") : "AyodhyaAI"}</span>
-                        <span>{nowTs(m.ts)}</span>
+                        <span>{m.role === "user" ? (user?.name || "You") : "Grantha"}</span>
+                        <span className="metaRight">
+                          {m.role === "assistant" && Array.isArray(m.sources) && m.sources.length > 0 && (
+                            <span
+                              className="groundedBadge"
+                              title="This answer is drawn from the passages listed below it"
+                            >
+                              <BookMarked size={11} /> Grounded · {m.sources.length}{" "}
+                              {m.sources.length === 1 ? "passage" : "passages"}
+                            </span>
+                          )}
+                          <span>{nowTs(m.ts)}</span>
+                        </span>
                       </div>
 
                       <div className="msgBody">

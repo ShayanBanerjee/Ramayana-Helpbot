@@ -1,4 +1,5 @@
 import os
+import re
 from typing import Any, Dict, List, Tuple
 
 from langchain_openai import ChatOpenAI
@@ -7,12 +8,37 @@ from src.moderation import is_flagged
 from src.prompts import (
     BASE_SYSTEM_PROMPT,
     CONTEXTUALIZE_PROMPT,
+    COSMOLOGY_GUIDANCE,
     INTENT_CLASSIFIER_PROMPT,
     MODERATION_BLOCKED_RESPONSE,
     OFF_TOPIC_RESPONSE,
     SMALLTALK_SYSTEM_PROMPT,
     USER_PROMPT_TEMPLATE,
 )
+
+
+# Questions about "multiverse" / other worlds / cosmic structure. The Valmiki
+# Ramayana never says "multiverse", so a plain vector/BM25 search for that word
+# finds nothing useful — we append the text's own vocabulary to the *search*
+# query (not the question the model sees) so retrieval reaches the passages on
+# lokas, heavens and underworlds.
+_COSMOLOGY_RE = re.compile(
+    r"multiverse|parallel (?:universe|world|reality|realit)|other (?:world|universe|realm|dimension)s?|"
+    r"many (?:world|universe)s?|multiple (?:world|universe)s?|cosmos|cosmolog|cosmic|\bloka|triloka|"
+    r"three worlds|svarga|heaven|patala|rasatala|underworld|netherworld|brahmaloka|brahmanda|"
+    r"dimension|realms?\b|creation of the (?:world|universe)",
+    re.IGNORECASE,
+)
+_COSMOLOGY_SEARCH_TERMS = "loka triloka three worlds Svarga heaven Patala Rasatala Brahmaloka nether regions"
+
+
+def is_cosmology_question(question: str) -> bool:
+    return bool(_COSMOLOGY_RE.search(question or ""))
+
+
+def expand_cosmology_query(search_query: str) -> str:
+    """Adds the text's own world/loka vocabulary to a cosmology search query."""
+    return f"{search_query} {_COSMOLOGY_SEARCH_TERMS}"
 
 
 def _display_page(meta: dict):
@@ -130,6 +156,9 @@ def answer_question(
         return resp.content, [], {"intent": "smalltalk", "tokens": _usage_from(resp)}
 
     search_query = contextualize_question(question, history or [], llm=llm)
+    cosmology = is_cosmology_question(question) or is_cosmology_question(search_query)
+    if cosmology:
+        search_query = expand_cosmology_query(search_query)
     scored_docs = hybrid_index.retrieve(
         search_query, k=k, fetch_k=fetch_k, score_threshold=score_threshold
     )
@@ -140,6 +169,8 @@ def answer_question(
     context = _build_context(scored_docs)
 
     prompt = BASE_SYSTEM_PROMPT + "\n\n" + USER_PROMPT_TEMPLATE.format(context=context, question=question)
+    if cosmology:
+        prompt += "\n\n" + COSMOLOGY_GUIDANCE
     resp = llm.invoke(prompt)
 
     sources = _sources_from_scored_docs(scored_docs)
@@ -151,4 +182,6 @@ def answer_question(
         "top_relevance": round(max((s for _, s in scored_docs), default=0.0), 3),
         "tokens": _usage_from(resp),
     }
+    if cosmology:
+        meta["cosmology"] = True
     return resp.content, sources, meta

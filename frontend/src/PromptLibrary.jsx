@@ -1,11 +1,12 @@
 import React, { useState } from "react";
-import { X, Sparkles, Users, Swords, ScrollText, BookOpen } from "lucide-react";
+import { X, Sparkles, Users, Swords, ScrollText, BookOpen, Orbit } from "lucide-react";
 import { PROMPT_CATEGORIES, promptsFor } from "./promptData";
 
 const CATEGORY_ICONS = {
   characters: <Users size={14} />,
   events: <Swords size={14} />,
   teachings: <ScrollText size={14} />,
+  cosmos: <Orbit size={14} />,
   puranas: <BookOpen size={14} />,
 };
 

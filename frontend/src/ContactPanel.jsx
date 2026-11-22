@@ -29,7 +29,7 @@ export default function ContactPanel({ onClose }) {
               <Logo size={22} />
             </div>
             <p>
-              AyodhyaAI is a Retrieval-Augmented Generation assistant grounded in the Valmiki
+              Grantha is a Retrieval-Augmented Generation assistant grounded in the Valmiki
               Ramayana, the Bhagavad Gita, and the Puranas connected to its world. Every answer is traced
               back to the indexed verse or page it came from — nothing is invented.
             </p>

@@ -2221,3 +2221,86 @@ a.contactRow:hover{
   color: var(--accent);
   margin-top: 1px;
 }
+
+
+/* ---------- Grantha brand polish: wordmark, trust strip, grounded badge ---------- */
+.landingWordmark{
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: -2px 0 -6px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+.wordmarkDeva{
+  font-family: var(--font-devanagari);
+  font-size: 15px;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  color: var(--accent);
+}
+.wordmarkDot{
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent-2);
+  opacity: 0.7;
+}
+
+.trustStrip{
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin: -2px 0 2px;
+  padding: 0;
+}
+.trustStrip li{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  border: 1px solid var(--border-soft);
+  background: var(--panel-2);
+  color: var(--muted);
+  font-size: 11.8px;
+  font-weight: 600;
+  backdrop-filter: blur(6px);
+}
+.trustStrip li svg{ color: var(--accent); }
+
+.metaRight{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.groundedBadge{
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(var(--good-rgb), 0.12);
+  color: var(--good);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.logoSpark{
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: logoTwinkle 3.6s ease-in-out infinite;
+}
+@keyframes logoTwinkle{
+  0%, 100%{ opacity: 1; transform: scale(1) rotate(0deg); }
+  50%{ opacity: 0.55; transform: scale(0.8) rotate(12deg); }
+}
+@media (prefers-reduced-motion: reduce){
+  .logoSpark{ animation: none; }
+}

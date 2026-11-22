@@ -150,3 +150,39 @@ def test_answer_question_handles_no_retrieved_context():
     assert meta["chunk_count"] == 0
     assert meta["top_relevance"] == 0.0
     assert "No relevant context" in llm.calls[-1]  # calls[0] is now the intent classifier
+
+
+def test_is_cosmology_question_matches_multiverse_and_loka_terms():
+    from src.rag import is_cosmology_question
+    assert is_cosmology_question("Does the Ramayana describe a multiverse?")
+    assert is_cosmology_question("What are the three worlds?")
+    assert is_cosmology_question("Tell me about Patala")
+    assert not is_cosmology_question("Who is Hanuman?")
+
+
+def test_cosmology_question_expands_search_and_adds_guidance():
+    llm = FakeLLM(script={
+        "Classify the user's message": "RAMAYANA",
+    }, default="A grounded answer.")
+    hybrid_index = FakeHybridIndex()
+
+    import src.rag as rag_mod
+    rag_mod._make_llm = lambda: llm
+
+    answer, sources, meta = answer_question("Is there a multiverse in the Ramayana?", hybrid_index, history=[])
+
+    assert meta["cosmology"] is True
+    assert "Svarga" in hybrid_index.queries_seen[0] and "loka" in hybrid_index.queries_seen[0]
+    assert any("worlds / cosmology" in c for c in llm.calls)
+
+
+def test_ordinary_question_is_not_flagged_cosmology():
+    llm = FakeLLM(script={"Classify the user's message": "RAMAYANA"}, default="ok")
+    hybrid_index = FakeHybridIndex()
+
+    import src.rag as rag_mod
+    rag_mod._make_llm = lambda: llm
+
+    _, _, meta = answer_question("Who is Hanuman?", hybrid_index, history=[])
+    assert "cosmology" not in meta
+    assert hybrid_index.queries_seen[0] == "Who is Hanuman?"

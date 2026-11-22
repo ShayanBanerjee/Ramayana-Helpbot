@@ -48,6 +48,17 @@ class DevConfig(BaseConfig):
     DEBUG = True
 
 
+class ProdConfig(BaseConfig):
+    """Used by wsgi.py (gunicorn). Debug off; refuses to boot with the
+    placeholder SECRET_KEY, since that would make every session cookie forgeable."""
+    DEBUG = False
+
+    @classmethod
+    def validate(cls):
+        if cls.SECRET_KEY in ("", "dev-secret-change-me"):
+            raise RuntimeError("Set a real SECRET_KEY in backend/.env before running in production.")
+
+
 class TestConfig(BaseConfig):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"

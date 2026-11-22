@@ -2,7 +2,7 @@ import React from "react";
 import { Megaphone } from "lucide-react";
 
 const SLOT_COPY = {
-  sidebar: "Sponsorships help keep AyodhyaAI free for everyone.",
+  sidebar: "Sponsorships help keep Grantha free for everyone.",
   landing: "This space is reserved for a sponsor message.",
 };
 

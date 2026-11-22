@@ -1,0 +1,20 @@
+[Unit]
+Description=Grantha (Flask + gunicorn)
+After=network.target
+
+[Service]
+User=grantha
+Group=grantha
+WorkingDirectory=/opt/grantha/backend
+EnvironmentFile=/opt/grantha/backend/.env
+# ONE worker + threads: every worker would load its own copy of the embedding
+# model, cross-encoder and BM25 index (~2-3 GB each). Threads share one copy.
+ExecStart=/opt/grantha/backend/.venv/bin/gunicorn wsgi:app \
+    --workers 1 --threads 6 --timeout 180 --bind 127.0.0.1:8080
+Restart=always
+RestartSec=5
+# Model loading at startup takes a while on first boot.
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target

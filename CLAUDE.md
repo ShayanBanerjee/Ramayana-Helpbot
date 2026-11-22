@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project overview
 
-Ramayana HelpBot: a RAG chatbot over the real Valmiki Ramayana plus ten more public-domain Hindu texts (the
+Grantha (askgrantha.com; formerly "Ramayana HelpBot" / "AyodhyaAI" — the repo/folder name is unchanged): a RAG chatbot over the real Valmiki Ramayana plus ten more public-domain Hindu texts (the
 Gita, several Puranas, the Upanishads, Ramcharitmanas — see `backend/data/` and README's "Index PDFs"
 section). Flask backend does PDF ingestion → chunking → Chroma vector store → hybrid (BM25 + vector)
 retrieval → cross-encoder rerank → OpenAI-generated grounded answers with citations, persisted per-user (or
@@ -132,6 +132,13 @@ special here beyond re-fetching `/api/chat/history` after login — the claimed 
   branch — `meta["intent"]` records which one ran; `sources` is `[]` for the two non-`RAMAYANA` branches. Sources
   are deduped by (file, page) keeping the highest-relevance occurrence, sorted by relevance descending; `meta`
   is what `chat.py` persists into `Message.meta_json`.
+- **Cosmology / "multiverse" questions** — the Valmiki Ramayana never uses the word "multiverse", so a plain
+  search for it finds nothing. `rag.py`'s `is_cosmology_question()` detects such questions; `expand_cosmology_query()`
+  appends the text's own vocabulary (loka, triloka, Svarga, Patala, Brahmaloka…) to the *search* query only, and
+  `prompts.COSMOLOGY_GUIDANCE` + system rule 8 make the model answer in that vocabulary, say what the text does
+  and doesn't state, and never present modern physics as scripture. `meta["cosmology"]` records it. The classifier
+  prompt names cosmology explicitly so "multiverse" isn't mis-routed to `OFF_TOPIC`. The "Worlds & Cosmology"
+  prompt-library category (`promptData.js`) and the landing chip feed this path.
 - `src/prompts.py` — `SCOPE_PHRASE` is the single source of truth for what this assistant claims to cover,
   interpolated into `BASE_SYSTEM_PROMPT`, `INTENT_CLASSIFIER_PROMPT`, `SMALLTALK_SYSTEM_PROMPT`, and
   `OFF_TOPIC_RESPONSE` — **update it, not each string separately, whenever `backend/data/` gains a new text**.

@@ -1,16 +1,20 @@
 import React from "react";
 
 /**
- * The app's mark: a three-shikhara temple skyline referencing Ayodhya's Ram
- * Mandir (a tall central spire flanked by two shorter ones, each a stack of
- * tiered "amalaka" rings narrowing toward a kalash finial, on a plinth) —
- * rather than a single generic spire. Deliberately kept as flat filled
- * silhouettes with no thin strokes, so the tiering ("layers") stays crisp
- * and doesn't collapse into a smudge at sidebar sizes (13-28px). An earlier
- * bow-and-arrow (Kodanda) concept read as a generic "back/undo" arrow icon
- * at these sizes and was replaced; this shape was screenshot-verified to
- * still read clearly as a temple skyline at 13px. Inherits color via
- * currentColor so it works on any gradient badge.
+ * The Grantha mark: an open manuscript (the "grantha" itself — the sacred
+ * text, i.e. the trustworthy knowledge base) with a flame of knowledge
+ * (jyoti) rising from its spine, and a four-point spark beside the flame
+ * (the AI that helps you explore it). Ordered by meaning: book = grounded
+ * in the text, flame = illumination/devotion (the diya of Diwali and Ram's
+ * return), spark = AI.
+ *
+ * Deliberately flat filled shapes with no thin strokes, so it stays crisp
+ * at sidebar sizes (13-28px). The flame's inner cut-out and the page gap
+ * are negative space (evenodd), so it works on any background through
+ * currentColor. The spark carries `.logoSpark` so CSS can give it a gentle
+ * twinkle (disabled under prefers-reduced-motion).
+ *
+ * Keep `frontend/public/favicon.svg` in sync if these paths change.
  */
 export default function Logo({ size = 24, className }) {
   return (
@@ -21,29 +25,33 @@ export default function Logo({ size = 24, className }) {
       fill="none"
       className={className}
       role="img"
-      aria-label="AyodhyaAI"
+      aria-label="Grantha"
     >
-      {/* left minor shikhara */}
-      <path d="M2.6 16.2H6.4L5.5 12.6H3.5L2.6 16.2Z" fill="currentColor" opacity="0.85" />
-      <path d="M3.7 12.4H5.3L4.5 9.2L3.7 12.4Z" fill="currentColor" opacity="0.85" />
-      <circle cx="4.5" cy="8.7" r="0.55" fill="currentColor" opacity="0.85" />
+      {/* open manuscript: two curved pages meeting at a spine */}
+      <path
+        d="M1.8 11.2C5.4 10.2 8.9 10.7 11.3 12.4V21.3C8.9 19.7 5.4 19.3 1.8 20.3Z"
+        fill="currentColor"
+      />
+      <path
+        d="M22.2 11.2C18.6 10.2 15.1 10.7 12.7 12.4V21.3C15.1 19.7 18.6 19.3 22.2 20.3Z"
+        fill="currentColor"
+        opacity="0.82"
+      />
 
-      {/* right minor shikhara */}
-      <path d="M17.6 16.2H21.4L20.5 12.6H18.5L17.6 16.2Z" fill="currentColor" opacity="0.85" />
-      <path d="M18.7 12.4H20.3L19.5 9.2L18.7 12.4Z" fill="currentColor" opacity="0.85" />
-      <circle cx="19.5" cy="8.7" r="0.55" fill="currentColor" opacity="0.85" />
+      {/* flame of knowledge with an inner cut-out */}
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M12 2.2C13.3 4 15.2 5.5 15.2 8.1C15.2 10.3 13.8 11.7 12 11.7C10.2 11.7 8.8 10.3 8.8 8.1C8.8 5.5 10.7 4 12 2.2ZM12 6.1C11.3 7.1 10.7 7.7 10.7 8.6C10.7 9.4 11.3 9.9 12 9.9C12.7 9.9 13.3 9.4 13.3 8.6C13.3 7.7 12.7 7.1 12 6.1Z"
+        fill="currentColor"
+      />
 
-      {/* central shikhara — tiered tower */}
-      <path d="M9.2 16.2H14.8L13.6 11.4H10.4L9.2 16.2Z" fill="currentColor" />
-      <path d="M10.8 11H13.2L12 4.4L10.8 11Z" fill="currentColor" />
-      <circle cx="12" cy="3.5" r="1" fill="currentColor" />
-      {/* dhwaja finial flag */}
-      <rect x="11.75" y="0.8" width="0.5" height="2.6" rx="0.25" fill="currentColor" />
-      <path d="M12.25 1.1 14.1 1.85 12.25 2.6Z" fill="currentColor" opacity="0.92" />
-
-      {/* plinth */}
-      <rect x="2" y="17.5" width="20" height="1.5" rx="0.4" fill="currentColor" opacity="0.9" />
-      <rect x="1.1" y="19.2" width="21.8" height="1.7" rx="0.5" fill="currentColor" opacity="0.75" />
+      {/* AI spark */}
+      <path
+        className="logoSpark"
+        d="M19.2 2.2L19.9 4.1L21.8 4.8L19.9 5.5L19.2 7.4L18.5 5.5L16.6 4.8L18.5 4.1Z"
+        fill="currentColor"
+      />
     </svg>
   );
 }

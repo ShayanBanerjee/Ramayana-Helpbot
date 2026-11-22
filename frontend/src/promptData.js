@@ -7,6 +7,7 @@ export const PROMPT_CATEGORIES = [
   { id: "characters", label: "Characters" },
   { id: "events", label: "Key Events" },
   { id: "teachings", label: "Teachings & Dharma" },
+  { id: "cosmos", label: "Worlds & Cosmology" },
   { id: "puranas", label: "Related Puranas" },
 ];
 
@@ -99,6 +100,67 @@ export const PROMPT_LIBRARY = [
     lead: "Loyalty and service",
     rest: "— what does the epic say, through Hanuman and Lakshmana?",
     prompt: "What does the epic say about loyalty and service through the examples of Hanuman and Lakshmana?",
+  },
+
+  // ---------------- Worlds & Cosmology ----------------
+  // The Valmiki Ramayana never says "multiverse" — these ask about its own
+  // vocabulary (lokas, Svarga, Patala, Brahmaloka) and let the grounded answer
+  // say what the text does and does not state.
+  {
+    id: "cosmos-multiverse",
+    category: "cosmos",
+    lead: "Many worlds?",
+    rest: "— does the Valmiki Ramayana describe more than one world or universe?",
+    prompt: "Does the Valmiki Ramayana describe multiple worlds or lokas, and what does it actually say about them?",
+  },
+  {
+    id: "cosmos-trishanku",
+    category: "cosmos",
+    lead: "Trishanku's heaven",
+    rest: "— how did Vishvamitra create a new heaven?",
+    prompt: "How did Vishvamitra create a separate heaven for Trishanku, according to the Valmiki Ramayana?",
+  },
+  {
+    id: "cosmos-trivikrama",
+    category: "cosmos",
+    lead: "Vamana's three steps",
+    rest: "— how does Vishnu span the worlds?",
+    prompt: "How does the Valmiki Ramayana tell the story of Vishnu as Vamana taking three strides across the worlds?",
+  },
+  {
+    id: "cosmos-ganga",
+    category: "cosmos",
+    lead: "Ganga's descent",
+    rest: "— from heaven to earth and the nether regions",
+    prompt: "How does the Ramayana describe the descent of the Ganga from heaven to earth and the nether regions?",
+  },
+  {
+    id: "cosmos-ocean",
+    category: "cosmos",
+    lead: "Churning of the ocean",
+    rest: "— which beings and realms are involved?",
+    prompt: "How does the Valmiki Ramayana describe the churning of the ocean, and which beings and realms are involved?",
+  },
+  {
+    id: "cosmos-ravana-worlds",
+    category: "cosmos",
+    lead: "Ravana and the three worlds",
+    rest: "— how far did his power reach?",
+    prompt: "How does the Ramayana describe Ravana's power over the three worlds and the gods?",
+  },
+  {
+    id: "cosmos-geography",
+    category: "cosmos",
+    lead: "The edges of the world",
+    rest: "— Sugriva's directions to the search parties",
+    prompt: "How does Sugriva describe the regions of the world when he sends the search parties in each direction?",
+  },
+  {
+    id: "cosmos-return",
+    category: "cosmos",
+    lead: "Rama's return",
+    rest: "— what does the Ramayana say about his divine nature at the end?",
+    prompt: "What does the Valmiki Ramayana say about Rama's divine nature and his return at the end of the story?",
   },
 
   // ---------------- Related Puranas ----------------

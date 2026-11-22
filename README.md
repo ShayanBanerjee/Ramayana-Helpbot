@@ -1,4 +1,4 @@
-# Ramayana HelpBot (RAG) — Chroma DB + LangChain + Flask + React
+# Grantha — askgrantha.com (RAG) — Chroma DB + LangChain + Flask + React
 
 Local-first RAG chatbot over the real Valmiki Ramayana and ten more public-domain Hindu texts (the Gita,
 several Puranas, the Upanishads, Ramcharitmanas), with a 5-question guest trial, accounts, per-user chat
