@@ -1,12 +1,13 @@
 # Deploying Grantha to a Hostinger VPS (askgrantha.com)
 
-Target: Hostinger **KVM 2** (2 vCPU / 8 GB RAM), **Ubuntu 22.04** (ships Python 3.10 — this project
-needs 3.10–3.11; avoid 24.04's 3.12). Architecture: nginx serves the built React app and proxies
+Target: Hostinger **KVM 2** (2 vCPU / 8 GB RAM), **Ubuntu 26.04 LTS**. Recent Ubuntu releases ship a
+Python newer than this project supports (it needs 3.10–3.11), so we install Python 3.11 with `uv` instead of
+relying on the system Python. (Ubuntu 22.04 also works: its system Python 3.10 is fine — use `python3 -m venv`.) Architecture: nginx serves the built React app and proxies
 `/api/*` to gunicorn (1 worker + threads) on `127.0.0.1:8080`.
 
 ## 1. Buy and create the VPS
 1. hPanel → VPS → choose **KVM 2** (try the 1-month term first, move to 24 months once it runs well).
-2. OS: **Ubuntu 22.04 64-bit, no control panel**. Pick the data center nearest your users.
+2. OS: **Ubuntu 26.04 64-bit, no control panel**. Pick the data center nearest your users.
 3. Set a root password and add your SSH public key. Note the server's **IPv4 address**.
 
 ## 2. Point the domain (GoDaddy → DNS)
@@ -30,23 +31,25 @@ echo '/swapfile none swap sw 0 0' >> /etc/fstab
 ```
 Log out and back in as `grantha` for the rest.
 
-## 4. Install system packages
+## 4. Install system packages and Python 3.11
 ```bash
-sudo apt install -y nginx git python3-venv python3-pip build-essential certbot python3-certbot-nginx
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash - && sudo apt install -y nodejs
-python3 --version   # must be 3.10.x or 3.11.x
+sudo apt install -y nginx git build-essential curl certbot python3-certbot-nginx
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash - && sudo apt install -y nodejs
+curl -LsSf https://astral.sh/uv/install.sh | sh && source ~/.local/bin/env
+uv python install 3.11
 ```
 
 ## 5. Get the code
 ```bash
 sudo mkdir -p /opt/grantha && sudo chown grantha:grantha /opt/grantha
-git clone <your-repo-url> /opt/grantha        # or: git clone ... then checkout main
+git clone -b dev https://github.com/ShayanBanerjee/Ramayana-Helpbot.git /opt/grantha   # use main once merged
 cd /opt/grantha/backend
-python3 -m venv .venv && source .venv/bin/activate
-pip install --upgrade pip
-pip install torch --index-url https://download.pytorch.org/whl/cpu   # CPU-only: far smaller than the default
-pip install -r requirements.txt
+uv venv --python 3.11 .venv && source .venv/bin/activate
+uv pip install torch --index-url https://download.pytorch.org/whl/cpu   # CPU-only: far smaller than the default
+uv pip install -r requirements.txt
+python --version   # must be 3.11.x
 ```
+If the repo is private, clone with a deploy key or a GitHub token instead.
 
 ## 6. Configure the backend
 ```bash
@@ -107,13 +110,13 @@ sudo certbot renew --dry-run
 ```bash
 curl https://askgrantha.com/api/health
 ```
-Then in a browser: landing page loads with the new logo → ask "Who is Hanuman?" → ask "Does the Valmiki
+Then in a browser: landing page loads with the new logo (and a smooth fade-in on reload) → ask "Who is Hanuman?" → ask "Does the Valmiki
 Ramayana describe multiple worlds?" → sign up → reload and confirm history persists.
 
 ## Updating later
 ```bash
 cd /opt/grantha && git pull
-cd backend && source .venv/bin/activate && pip install -r requirements.txt
+cd backend && source .venv/bin/activate && uv pip install -r requirements.txt
 cd ../frontend && npm ci && npm run build
 sudo systemctl restart grantha
 ```
@@ -124,6 +127,7 @@ Back up `backend/instance/` (SQLite users + chats) and `backend/chroma_store/` n
 
 ## Troubleshooting
 - **502 from nginx** → gunicorn still loading models or crashed: `journalctl -u grantha -n 100`.
+- **`pip`/`uv` build errors or missing wheels** → you are on the wrong Python: `python --version` inside the venv must be 3.11.x.
 - **Killed / out-of-memory** → confirm the service uses `--workers 1`, check `free -h`, keep the swap file.
 - **Login works then logs out** → `SESSION_COOKIE_SECURE=true` requires HTTPS; confirm certbot finished.
 - **OAuth redirect_uri_mismatch** → the registered URI must be exactly `https://askgrantha.com/api/auth/<provider>/callback`.

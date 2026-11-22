@@ -19,7 +19,7 @@ away from retrieval entirely, so it's pleasant to greet and honest about what it
 ---
 
 ## 1) Prerequisites
-- Python 3.10–3.11 (some ML deps don't yet ship wheels for very new Python releases — 3.11 is the safest bet)
+- Python 3.10–3.11 (some ML deps don't yet ship wheels for very new Python releases — 3.11 is the safest bet; on a fresh Ubuntu 26.04 VPS install it with `uv python install 3.11` — see DEPLOYMENT.md)
 - Node 18+
 - An OpenAI API key
 - Optional: a Google Cloud OAuth client and/or a Meta for Developers app, for social login
