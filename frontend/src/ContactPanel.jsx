@@ -26,7 +26,7 @@ export default function ContactPanel({ onClose }) {
         <div className="contactBody">
           <div className="contactIntro">
             <div className="emblem contactEmblem">
-              <Logo size={22} />
+              <Logo size={32} />
             </div>
             <p>
               Grantha is a Retrieval-Augmented Generation assistant grounded in the Valmiki

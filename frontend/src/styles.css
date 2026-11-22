@@ -223,9 +223,9 @@ a { color: var(--accent-2); }
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 9px;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
   color: #fff;
   flex-shrink: 0;
@@ -529,8 +529,8 @@ a { color: var(--accent-2); }
 }
 
 .emblem{
-  width: 60px;
-  height: 60px;
+  width: 68px;
+  height: 68px;
   border-radius: 19px;
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
   display: flex;
@@ -940,6 +940,30 @@ a { color: var(--accent-2); }
 }
 .loadingSplash .emblem{ animation: pulse 2.2s ease-in-out infinite; }
 
+/* Smooth reload: art fades in, app shell fades up instead of popping. */
+.bgArt{ animation: fadeIn 700ms ease both; }
+.app{ animation: appIn 480ms cubic-bezier(.2,.7,.2,1) both; }
+@keyframes appIn{
+  from{ opacity: 0; transform: translateY(6px); }
+  to{ opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce){
+  .bgArt, .app{ animation: none; }
+}
+
+.logoFlame{
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: flameFlicker 3.2s ease-in-out infinite;
+}
+@keyframes flameFlicker{
+  0%, 100%{ transform: scale(1) rotate(0deg); }
+  50%{ transform: scale(1.04, 1.07) rotate(-1.5deg); }
+}
+@media (prefers-reduced-motion: reduce){
+  .logoFlame{ animation: none; }
+}
+
 @keyframes pulse{
   0%, 100%{ transform: scale(1); opacity: 1; }
   50%{ transform: scale(1.05); opacity: 0.82; }
@@ -971,7 +995,7 @@ a { color: var(--accent-2); }
   text-align: center;
 }
 
-.authEmblem{ width: 52px; height: 52px; font-size: 22px; border-radius: 16px; }
+.authEmblem{ width: 58px; height: 58px; font-size: 22px; border-radius: 16px; }
 .authCard .landingTitle{ font-size: 22px; }
 .authCard .landingSubtitle{ margin-top: -6px; font-size: 13px; }
 
@@ -1455,7 +1479,7 @@ a { color: var(--accent-2); }
   }
   .suggestGrid{ grid-template-columns: 1fr; }
   .landingTitle{ font-size: 22px; }
-  .emblem{ width: 52px; height: 52px; font-size: 22px; border-radius: 16px; }
+  .emblem{ width: 58px; height: 58px; font-size: 22px; border-radius: 17px; }
   .shlokaPanel{ max-height: 92vh; }
   .shlokaHeader, .shlokaTabs, .shlokaList{ padding-left: 16px; padding-right: 16px; }
   .shlokaPersonaBlurb{ margin-left: 16px; margin-right: 16px; }

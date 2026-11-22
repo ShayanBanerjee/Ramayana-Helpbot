@@ -384,7 +384,7 @@ export default function App() {
         <div className="bgVeil" style={{ opacity: veilOpacity }} />
         <div className="loadingSplash">
           <div className="emblem">
-            <Logo size={28} />
+            <Logo size={38} />
           </div>
         </div>
       </>
@@ -459,7 +459,7 @@ export default function App() {
           <div className="brand">
             <div className="brandTitle">
               <span className="brandIcon">
-                <Logo size={15} />
+                <Logo size={20} />
               </span>
               Grantha
               <button className="sidebarCloseBtn" onClick={() => setSidebarOpen(false)} title="Close">
@@ -566,8 +566,8 @@ export default function App() {
                 <Menu size={17} />
               </button>
               <div className="mobileBrand">
-                <span className="brandIcon" style={{ width: 24, height: 24, borderRadius: 7 }}>
-                  <Logo size={13} />
+                <span className="brandIcon" style={{ width: 28, height: 28, borderRadius: 8 }}>
+                  <Logo size={18} />
                 </span>
                 Grantha
               </div>
@@ -601,7 +601,7 @@ export default function App() {
             {isLanding ? (
               <div className="landingWrap">
                 <div className="emblem">
-                  <Logo size={28} />
+                  <Logo size={38} />
                 </div>
                 <p className="landingEyebrow">ॐ श्री रामाय नमः</p>
                 <p className="landingWordmark" aria-label="Grantha — ग्रन्थ">
@@ -667,7 +667,7 @@ export default function App() {
                   return (
                   <div key={idx} className={"row " + (m.role === "user" ? "user" : "assistant")}>
                     <div className={"avatar " + (m.role === "user" ? "user" : "assistant")}>
-                      {m.role === "user" ? <UserIcon size={15} /> : <Logo size={16} />}
+                      {m.role === "user" ? <UserIcon size={15} /> : <Logo size={20} />}
                     </div>
                     <div className={"bubble " + (m.role === "user" ? "user" : "assistant")}>
                       <div className="meta">
@@ -744,7 +744,7 @@ export default function App() {
                 {busy && (
                   <div className="row assistant">
                     <div className="avatar assistant">
-                      <Logo size={16} />
+                      <Logo size={20} />
                     </div>
                     <div className="bubble assistant">
                       <div className="typing">

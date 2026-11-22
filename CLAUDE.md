@@ -204,15 +204,11 @@ special here beyond re-fetching `/api/chat/history` after login — the claimed 
   case-insensitive filesystem will silently resolve an import to the wrong file if a data module and a
   same-named component only differ by case (this actually happened once — `promptLibrary.js` collided with
   `PromptLibrary.jsx` and broke the build with a confusing "no default export" error).
-- `src/Logo.jsx` — the app's mark: a three-shikhara temple skyline referencing Ayodhya's Ram Mandir (tall
-  central spire + two shorter flanking ones, each a stepped "amalaka" tier stack, dhwaja flag finial atop the
-  center), not the Om glyph and not the originally-tried bow-and-arrow (Kodanda) — the bow read as a generic
-  "back/undo" icon at sidebar sizes, a genuine usability problem for a mark reused everywhere. Filled SVG via
-  `currentColor`, `size` prop in px. Used in the sidebar brand row, mobile topbar, landing emblem, auth screen,
-  chat message avatars, and loading splash — if adding another brand spot, use `<Logo>` there too rather than
-  reintroducing a raw glyph. `frontend/public/favicon.svg` is a fixed-color (non-`currentColor`) copy of the
-  same silhouette on a dark plinth backdrop, wired via `<link rel="icon">` in `index.html` — keep the two in
-  sync if the mark's paths change.
+- `src/Logo.jsx` — the app's mark: a flame of knowledge (teardrop cut-out) rising over an open manuscript, plus a small
+  AI spark (`.logoSpark` twinkles, `.logoFlame` flickers; both disabled under reduced motion). Filled SVG via
+  `currentColor`, `size` prop in px; use `<Logo>` for any brand spot rather than a raw glyph. `frontend/public/favicon.svg`
+  and the inline `#boot` splash in `index.html` are fixed-color copies of the same paths — keep all three in sync.
+  `main.jsx` fades the `#boot` splash out after React's first paint so reloads transition smoothly.
 - `src/AuthScreen.jsx` — login/signup form (client-side validation mirrors the backend's: email regex, 8-char
   password minimum) plus Google/Facebook OAuth buttons (plain `<a href="/api/auth/google">` — a full navigation,
   not an XHR, since OAuth requires a real browser redirect) and an Instagram button that shows an explanatory
